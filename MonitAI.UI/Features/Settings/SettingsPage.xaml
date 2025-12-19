@@ -1,0 +1,79 @@
+<Page x:Class="MonitAI.UI.Features.Settings.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      mc:Ignorable="d" 
+      d:DesignHeight="700" d:DesignWidth="900"
+      Title="設定">
+
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="設定" 
+                   FontSize="28" 
+                   FontWeight="SemiBold" 
+                   Margin="0,0,0,20"/>
+
+        <StackPanel Grid.Row="1">
+            <!-- API Key Setting -->
+            <ui:CardControl Icon="{ui:SymbolIcon Key24}" Margin="0,0,0,20">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Gemini API Key" FontWeight="Medium"/>
+                        <TextBlock Text="Google AI Studioで取得したAPIキーを入力してください" 
+                                   FontSize="12" 
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:PasswordBox x:Name="ApiKeyBox" 
+                                PlaceholderText="API Key" 
+                                Width="300"
+                                PasswordChar="●"/>
+            </ui:CardControl>
+
+            <!-- Model Selection -->
+            <ui:CardControl Icon="{ui:SymbolIcon BrainCircuit24}" Margin="0,0,0,20">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="AI Model" FontWeight="Medium"/>
+                        <TextBlock Text="使用するGeminiモデルを選択してください" 
+                                   FontSize="12" 
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="ModelComboBox" Width="300" SelectedIndex="0">
+                    <ComboBoxItem Content="gemini-2.0-flash-exp"/>
+                    <ComboBoxItem Content="gemini-1.5-flash"/>
+                    <ComboBoxItem Content="gemini-1.5-pro"/>
+                </ComboBox>
+            </ui:CardControl>
+
+            <!-- CLI Path Setting -->
+            <ui:CardControl Icon="{ui:SymbolIcon Code24}" Margin="0,0,0,20">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Gemini CLI Path" FontWeight="Medium"/>
+                        <TextBlock Text="gemini-cliの実行ファイルパス (例: C:\...\gemini.cmd)" 
+                                   FontSize="12" 
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:TextBox x:Name="CliPathBox" 
+                         PlaceholderText="C:\path\to\gemini.cmd" 
+                         Width="300"/>
+            </ui:CardControl>
+
+            <!-- Save Button -->
+            <ui:Button Content="設定を保存" 
+                       Icon="{ui:SymbolIcon Save24}" 
+                       Appearance="Primary" 
+                       HorizontalAlignment="Right"
+                       Click="OnSaveClick"/>
+        </StackPanel>
+    </Grid>
+</Page>

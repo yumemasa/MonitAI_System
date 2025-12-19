@@ -1,14 +1,26 @@
-ï»¿using System.Configuration;
-using System.Data;
 using System.Windows;
+using Wpf.Ui.Appearance;
 
 namespace MonitAI.UI
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ÌƒGƒ“ƒgƒŠ[ƒ|ƒCƒ“ƒgB
     /// </summary>
-    public partial class App : System.Windows.Application
+    public partial class App : Application
     {
-    }
+        /// <summary>
+        /// ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‹N“®‚Ìˆ—B
+        /// </summary>
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
 
+            // ƒ_[ƒNƒe[ƒ}‚ğ“K—p
+            ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+
+            // MainWindow‚ğ’¼ÚƒCƒ“ƒXƒ^ƒ“ƒX‰»
+            var mainWindow = new Features.Main.MainWindow();
+            mainWindow.Show();
+        }
+    }
 }
