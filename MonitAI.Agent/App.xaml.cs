@@ -24,11 +24,14 @@ namespace MonitAI.Agent
         private Random _random = new Random();
 
         private Forms.NotifyIcon? _notifyIcon;
+
+        // 設定値
         private string _apiKey = "";
         private string _rules = "";
         private string _cliPath = @"C:\nvm4w\nodejs\gemini.cmd";
+        private string _selectedModel = "gemini-2.5-flash-lite"; // デフォルト
 
-        // ★ログファイルのパス (AppDataに保存)
+        // ログファイルのパス
         private string LogPath => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "screenShot2",
@@ -38,10 +41,9 @@ namespace MonitAI.Agent
         {
             base.OnStartup(e);
 
-            // 起動時にログをクリア（または区切りを入れる）
             WriteLog("=== Agent Started ===");
 
-            LoadSettings();
+            LoadSettings(); // ここでモデル設定なども読み込む
             InitializeServices();
             SetupTrayIcon();
 
@@ -57,16 +59,13 @@ namespace MonitAI.Agent
             }
         }
 
-        // ★ログ書き込みメソッド（ここが重要）
         private void WriteLog(string message)
         {
             try
             {
                 string logLine = $"[{DateTime.Now:HH:mm:ss}] {message}";
-                // デバッグ出力にも出す
                 Debug.WriteLine(logLine);
 
-                // ファイルに追記 (UIがこれを読み取る)
                 string dir = Path.GetDirectoryName(LogPath)!;
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
                 File.AppendAllText(LogPath, logLine + Environment.NewLine);
@@ -80,6 +79,10 @@ namespace MonitAI.Agent
             {
                 _screenshotService = new ScreenshotService();
 
+                // モニター情報をログ出力 (移植漏れの補完)
+                var screens = Forms.Screen.AllScreens;
+                WriteLog($"検出されたモニター: {screens.Length}");
+
                 _saveFolderPath = _screenshotService.DefaultSaveFolderPath ?? Path.Combine(Path.GetTempPath(), "MonitAI_Captures");
                 if (!Directory.Exists(_saveFolderPath)) Directory.CreateDirectory(_saveFolderPath);
                 WriteLog($"保存先: {_saveFolderPath}");
@@ -87,9 +90,9 @@ namespace MonitAI.Agent
                 _geminiService = new GeminiService();
                 _geminiService.GeminiCliCommand = _cliPath;
 
-                // ★CLI接続チェック
                 WriteLog($"CLIパス: {_cliPath}");
-                WriteLog("CLI接続チェック中...");
+                WriteLog($"使用モデル: {_selectedModel}"); // ログ確認用
+
                 bool cliOk = await _geminiService.CheckCliConnectionAsync();
                 WriteLog(cliOk ? "✅ CLI接続OK" : "❌ CLI接続失敗 (設定を確認してください)");
 
@@ -164,18 +167,16 @@ namespace MonitAI.Agent
             if (files.Count == 0) return;
 
             _screenshotCount += files.Count;
-            // ログには枚数を表示
             WriteLog($"📸 撮影成功 ({files.Count}枚) 合計:{_screenshotCount}枚 -> Gemini送信...");
 
-            string modelName = "gemini-2.5-flash-lite";
+            // ★修正: 固定文字列ではなく、設定から読み込んだモデルを使用
+            var result = await _geminiService.AnalyzeAsync(files, _rules, _apiKey, _selectedModel);
 
-            var result = await _geminiService.AnalyzeAsync(files, _rules, _apiKey, modelName);
-
-            WriteLog($"Gemini応答: {result.RawText.Replace("\n", " ").Substring(0, Math.Min(50, result.RawText.Length))}...");
+            WriteLog($"Gemini応答 ({result.Source}): {result.RawText.Replace("\n", " ").Substring(0, Math.Min(50, result.RawText.Length))}...");
 
             HandleAnalysisResult(result);
 
-            foreach (var f in files) { try { File.Delete(f); } catch { } }
+            _screenshotService.DeleteFiles(files);
         }
 
         private void HandleAnalysisResult(GeminiAnalysisResult result)
@@ -184,12 +185,14 @@ namespace MonitAI.Agent
 
             if (result.IsViolation)
             {
-                _violationPoints += 30;
-                WriteLog($"⚠️ 違反判定! (+30pt) 現在:{_violationPoints}pt");
+                // ★修正: 元コードに合わせて +201 ポイントに戻す (30ではない)
+                _violationPoints += 201;
+                WriteLog($"⚠️ 違反判定! (+201pt) 現在:{_violationPoints}pt");
                 ShowNotification("違反検知", $"ポイント: {_violationPoints}");
             }
             else
             {
+                // 正常時は -5 ポイント (ここは元コードと一致)
                 _violationPoints = Math.Max(0, _violationPoints - 5);
                 WriteLog($"✅ 正常判定 (-5pt) 現在:{_violationPoints}pt");
 
@@ -222,6 +225,10 @@ namespace MonitAI.Agent
                         if (settings.TryGetValue("ApiKey", out var key)) _apiKey = key;
                         if (settings.TryGetValue("Rules", out var rules)) _rules = rules;
                         if (settings.TryGetValue("CliPath", out var path)) _cliPath = path;
+
+                        // ★追加: UIで保存したモデル設定を読み込む
+                        if (settings.TryGetValue("Model", out var model)) _selectedModel = model;
+
                         WriteLog("設定読み込み完了");
                     }
                 }

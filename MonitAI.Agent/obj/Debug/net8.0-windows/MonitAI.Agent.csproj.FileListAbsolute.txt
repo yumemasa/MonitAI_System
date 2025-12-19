@@ -30,3 +30,4 @@ C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-win
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\MonitAI.Agent.pdb
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\MonitAI.Agent.genruntimeconfig.cache
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\ref\MonitAI.Agent.dll
+C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\MonitAI.Agent.sourcelink.json
