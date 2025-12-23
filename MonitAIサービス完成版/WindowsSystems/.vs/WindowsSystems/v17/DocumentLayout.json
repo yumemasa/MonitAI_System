@@ -1,0 +1,66 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\it222187\\source\\repos\\WindowsSystems\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{CDB05E10-6C6D-440D-9067-957BEFBD9B98}|WindowsSystems\\WindowsSystems.csproj|c:\\users\\it222187\\source\\repos\\windowssystems\\windowssystems\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CDB05E10-6C6D-440D-9067-957BEFBD9B98}|WindowsSystems\\WindowsSystems.csproj|solutionrelative:windowssystems\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CDB05E10-6C6D-440D-9067-957BEFBD9B98}|WindowsSystems\\WindowsSystems.csproj|c:\\users\\it222187\\source\\repos\\windowssystems\\windowssystems\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CDB05E10-6C6D-440D-9067-957BEFBD9B98}|WindowsSystems\\WindowsSystems.csproj|solutionrelative:windowssystems\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Worker.cs",
+              "DocumentMoniker": "C:\\Users\\it222187\\source\\repos\\WindowsSystems\\WindowsSystems\\Worker.cs",
+              "RelativeDocumentMoniker": "WindowsSystems\\Worker.cs",
+              "ToolTip": "C:\\Users\\it222187\\source\\repos\\WindowsSystems\\WindowsSystems\\Worker.cs",
+              "RelativeToolTip": "WindowsSystems\\Worker.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-16T00:51:07.293Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\it222187\\source\\repos\\WindowsSystems\\WindowsSystems\\Program.cs",
+              "RelativeDocumentMoniker": "WindowsSystems\\Program.cs",
+              "ToolTip": "C:\\Users\\it222187\\source\\repos\\WindowsSystems\\WindowsSystems\\Program.cs",
+              "RelativeToolTip": "WindowsSystems\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-16T00:51:04.053Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

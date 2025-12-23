@@ -185,22 +185,39 @@ namespace MonitAI.Agent
 
             if (result.IsViolation)
             {
-                // ★修正: 元コードに合わせて +201 ポイントに戻す (30ではない)
-                _violationPoints += 201;
-                WriteLog($"⚠️ 違反判定! (+201pt) 現在:{_violationPoints}pt");
+                // ★修正: 1回の違反で +15 ポイント
+                _violationPoints += 15;
+                WriteLog($"⚠️ 違反判定! (+15pt) 現在:{_violationPoints}pt");
                 ShowNotification("違反検知", $"ポイント: {_violationPoints}");
             }
             else
             {
-                // 正常時は -5 ポイント (ここは元コードと一致)
+                // 正常時は -5 ポイント
                 _violationPoints = Math.Max(0, _violationPoints - 5);
                 WriteLog($"✅ 正常判定 (-5pt) 現在:{_violationPoints}pt");
 
                 if (_violationPoints == 0) _interventionService.ResetAllInterventions();
             }
 
+            // UI連携用ステータスファイルの更新
+            UpdateStatusFile(_violationPoints);
+
             string goalSummary = _rules.Split('\n').FirstOrDefault() ?? "目標";
             _ = _interventionService.ApplyLevelAsync(_violationPoints, goalSummary);
+        }
+
+        private void UpdateStatusFile(int points)
+        {
+            try
+            {
+                string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "screenShot2");
+                if (!Directory.Exists(appData)) Directory.CreateDirectory(appData);
+                string statusPath = Path.Combine(appData, "status.json");
+
+                var status = new { Points = points, LastUpdated = DateTime.Now };
+                File.WriteAllText(statusPath, JsonSerializer.Serialize(status));
+            }
+            catch { }
         }
 
         private void ShowNotification(string title, string message)

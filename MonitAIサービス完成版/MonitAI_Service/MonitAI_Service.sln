@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36623.8
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonitAI_Service", "MonitAI_Service\MonitAI_Service.csproj", "{447144B0-C48A-48FA-8679-3909F7AE7C15}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "MonitAI_Installer", "MonitAI_Installer\MonitAI_Installer.vdproj", "{DB10264F-67B1-0697-527E-8258B5C3796B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{447144B0-C48A-48FA-8679-3909F7AE7C15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{447144B0-C48A-48FA-8679-3909F7AE7C15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{447144B0-C48A-48FA-8679-3909F7AE7C15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{447144B0-C48A-48FA-8679-3909F7AE7C15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB10264F-67B1-0697-527E-8258B5C3796B}.Debug|Any CPU.ActiveCfg = Debug
+		{DB10264F-67B1-0697-527E-8258B5C3796B}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6914052C-D4FC-4A4E-8E98-4091FD04D594}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,235 @@
+{
+  "version": 2,
+  "dgSpecHash": "Fnxtd2kNP0I=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.bcl\\1.1.10\\microsoft.bcl.1.1.10.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.bcl.async\\1.0.168\\microsoft.bcl.async.1.0.168.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.bcl.build\\1.0.21\\microsoft.bcl.build.1.0.21.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.entityframeworkcore\\2.1.4\\microsoft.entityframeworkcore.2.1.4.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\2.1.4\\microsoft.entityframeworkcore.abstractions.2.1.4.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\2.1.4\\microsoft.entityframeworkcore.analyzers.2.1.4.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\2.1.2\\microsoft.extensions.caching.abstractions.2.1.2.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.caching.memory\\2.1.2\\microsoft.extensions.caching.memory.2.1.2.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.configuration\\8.0.0\\microsoft.extensions.configuration.8.0.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\8.0.0\\microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.configuration.binder\\8.0.2\\microsoft.extensions.configuration.binder.8.0.2.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.configuration.commandline\\8.0.0\\microsoft.extensions.configuration.commandline.8.0.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.configuration.environmentvariables\\8.0.0\\microsoft.extensions.configuration.environmentvariables.8.0.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.configuration.fileextensions\\8.0.1\\microsoft.extensions.configuration.fileextensions.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.configuration.json\\8.0.1\\microsoft.extensions.configuration.json.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.configuration.usersecrets\\8.0.1\\microsoft.extensions.configuration.usersecrets.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\8.0.1\\microsoft.extensions.dependencyinjection.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.diagnostics\\8.0.1\\microsoft.extensions.diagnostics.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.diagnostics.abstractions\\8.0.1\\microsoft.extensions.diagnostics.abstractions.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.fileproviders.abstractions\\8.0.0\\microsoft.extensions.fileproviders.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.fileproviders.physical\\8.0.0\\microsoft.extensions.fileproviders.physical.8.0.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.filesystemglobbing\\8.0.0\\microsoft.extensions.filesystemglobbing.8.0.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.hosting\\8.0.1\\microsoft.extensions.hosting.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.hosting.abstractions\\8.0.1\\microsoft.extensions.hosting.abstractions.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.hosting.windowsservices\\8.0.1\\microsoft.extensions.hosting.windowsservices.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.logging\\8.0.1\\microsoft.extensions.logging.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.2\\microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.logging.configuration\\8.0.1\\microsoft.extensions.logging.configuration.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.logging.console\\8.0.1\\microsoft.extensions.logging.console.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.logging.debug\\8.0.1\\microsoft.extensions.logging.debug.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.logging.eventlog\\8.0.1\\microsoft.extensions.logging.eventlog.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.logging.eventsource\\8.0.1\\microsoft.extensions.logging.eventsource.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.options\\8.0.2\\microsoft.extensions.options.8.0.2.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.options.configurationextensions\\8.0.0\\microsoft.extensions.options.configurationextensions.8.0.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.netcore.platforms\\1.0.1\\microsoft.netcore.platforms.1.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\microsoft.netcore.targets\\1.0.1\\microsoft.netcore.targets.1.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\msgpack.cli\\1.0.0\\msgpack.cli.1.0.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\nito.asyncex\\4.0.1\\nito.asyncex.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\plato\\2.0.132\\plato.2.0.132.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\plato.cache\\2.0.132\\plato.cache.2.0.132.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\plato.configuration\\2.0.132\\plato.configuration.2.0.132.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\plato.core\\2.0.132\\plato.core.2.0.132.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\plato.security\\2.0.132\\plato.security.2.0.132.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\plato.serializers\\2.0.132\\plato.serializers.2.0.132.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\plato.winapi\\2.0.132\\plato.winapi.2.0.132.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\remotion.linq\\2.2.0\\remotion.linq.2.2.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.buffers\\4.5.0\\system.buffers.4.5.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.collections\\4.0.11\\system.collections.4.0.11.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.collections.concurrent\\4.0.12\\system.collections.concurrent.4.0.12.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.collections.immutable\\1.5.0\\system.collections.immutable.1.5.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.collections.nongeneric\\4.0.1\\system.collections.nongeneric.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.collections.specialized\\4.0.1\\system.collections.specialized.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.componentmodel.annotations\\4.5.0\\system.componentmodel.annotations.4.5.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.data.common\\4.1.0\\system.data.common.4.1.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.diagnostics.contracts\\4.0.1\\system.diagnostics.contracts.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.diagnostics.debug\\4.0.11\\system.diagnostics.debug.4.0.11.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.diagnostics.diagnosticsource\\4.5.1\\system.diagnostics.diagnosticsource.4.5.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.diagnostics.eventlog\\8.0.1\\system.diagnostics.eventlog.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.diagnostics.tools\\4.0.1\\system.diagnostics.tools.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.diagnostics.tracing\\4.1.0\\system.diagnostics.tracing.4.1.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.globalization\\4.0.11\\system.globalization.4.0.11.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.globalization.extensions\\4.0.1\\system.globalization.extensions.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.interactive.async\\3.2.0\\system.interactive.async.3.2.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.io\\4.1.0\\system.io.4.1.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.linq\\4.1.0\\system.linq.4.1.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.linq.expressions\\4.1.0\\system.linq.expressions.4.1.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.linq.queryable\\4.0.1\\system.linq.queryable.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.numerics.vectors\\4.5.0\\system.numerics.vectors.4.5.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.objectmodel\\4.0.12\\system.objectmodel.4.0.12.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.reflection\\4.1.0\\system.reflection.4.1.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.reflection.emit\\4.0.1\\system.reflection.emit.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.reflection.emit.ilgeneration\\4.0.1\\system.reflection.emit.ilgeneration.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.reflection.emit.lightweight\\4.0.1\\system.reflection.emit.lightweight.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.reflection.extensions\\4.0.1\\system.reflection.extensions.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.reflection.primitives\\4.0.1\\system.reflection.primitives.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.reflection.typeextensions\\4.1.0\\system.reflection.typeextensions.4.1.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.resources.resourcemanager\\4.0.1\\system.resources.resourcemanager.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.runtime\\4.1.0\\system.runtime.4.1.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\4.5.2\\system.runtime.compilerservices.unsafe.4.5.2.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.runtime.extensions\\4.1.0\\system.runtime.extensions.4.1.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.runtime.handles\\4.0.1\\system.runtime.handles.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.runtime.interopservices\\4.1.0\\system.runtime.interopservices.4.1.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.runtime.numerics\\4.0.1\\system.runtime.numerics.4.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.runtime.serialization.primitives\\4.1.1\\system.runtime.serialization.primitives.4.1.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.serviceprocess.servicecontroller\\8.0.1\\system.serviceprocess.servicecontroller.8.0.1.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.text.encoding\\4.0.11\\system.text.encoding.4.0.11.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.text.encoding.extensions\\4.0.11\\system.text.encoding.extensions.4.0.11.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.text.regularexpressions\\4.1.0\\system.text.regularexpressions.4.1.0.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.threading\\4.0.11\\system.threading.4.0.11.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\system.threading.tasks\\4.0.11\\system.threading.tasks.4.0.11.nupkg.sha512",
+    "C:\\Users\\it222187\\.nuget\\packages\\windowsserviceframework.extensions\\2018.10.15.14\\windowsserviceframework.extensions.2018.10.15.14.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "パッケージ 'Microsoft.Bcl 1.1.10' はプロジェクトのターゲット フレームワーク 'net8.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
+      "projectPath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "libraryId": "Microsoft.Bcl",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "パッケージ 'Microsoft.Bcl.Async 1.0.168' はプロジェクトのターゲット フレームワーク 'net8.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
+      "projectPath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "libraryId": "Microsoft.Bcl.Async",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "パッケージ 'Nito.AsyncEx 4.0.1' はプロジェクトのターゲット フレームワーク 'net8.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
+      "projectPath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "libraryId": "Nito.AsyncEx",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "パッケージ 'Plato 2.0.132' はプロジェクトのターゲット フレームワーク 'net8.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
+      "projectPath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "libraryId": "Plato",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "パッケージ 'Plato.Cache 2.0.132' はプロジェクトのターゲット フレームワーク 'net8.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
+      "projectPath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "libraryId": "Plato.Cache",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "パッケージ 'Plato.Configuration 2.0.132' はプロジェクトのターゲット フレームワーク 'net8.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
+      "projectPath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "libraryId": "Plato.Configuration",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "パッケージ 'Plato.Core 2.0.132' はプロジェクトのターゲット フレームワーク 'net8.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
+      "projectPath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "libraryId": "Plato.Core",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "パッケージ 'Plato.Security 2.0.132' はプロジェクトのターゲット フレームワーク 'net8.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
+      "projectPath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "libraryId": "Plato.Security",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "パッケージ 'Plato.Serializers 2.0.132' はプロジェクトのターゲット フレームワーク 'net8.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
+      "projectPath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "libraryId": "Plato.Serializers",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "パッケージ 'Plato.WinAPI 2.0.132' はプロジェクトのターゲット フレームワーク 'net8.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
+      "projectPath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "libraryId": "Plato.WinAPI",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "パッケージ 'WindowsServiceFramework.Extensions 2018.10.15.14' はプロジェクトのターゲット フレームワーク 'net8.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
+      "projectPath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitAI_Service.csproj",
+      "libraryId": "WindowsServiceFramework.Extensions",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
+}

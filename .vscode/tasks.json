@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build Solution",
+			"type": "shell",
+			"command": "dotnet build MonitAI_System.sln",
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Run MonitAI.UI",
+			"type": "shell",
+			"command": "dotnet run --project MonitAI.UI/MonitAI.UI.csproj",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Run MonitAI.UI",
+			"type": "shell",
+			"command": "dotnet run --project MonitAI.UI/MonitAI.UI.csproj",
+			"isBackground": false,
+			"group": "test"
+		}
+	]
+}

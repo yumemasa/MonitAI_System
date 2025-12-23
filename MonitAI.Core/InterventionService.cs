@@ -43,79 +43,101 @@ namespace MonitAI.Core
             _mouseInversionTimer.Tick += MouseInversionTimer_Tick;
         }
 
+        private int _lastLevel = 0;
+
         /// <summary>
         /// ポイントに基づいて介入レベルを適用します。
         /// </summary>
         public async Task ApplyLevelAsync(int points, string goalSummary)
         {
             string message = "";
+            int currentLevel = 0;
 
-            // レベル1: 通知
-            if (points >= 1 && points <= 30)
+            if (points <= 0)
             {
-                message = "📢 レベル1: 警告通知";
-                OnNotification?.Invoke($"あなたの目標は「{goalSummary}」です。やるべきことに戻りましょう。", "警告");
-            }
-            else if (points <= 0)
-            {
-                ResetAllInterventions();
+                currentLevel = 0;
+                if (_lastLevel != 0) ResetAllInterventions();
+                _lastLevel = 0;
                 return;
             }
-            // レベル2: 入力遅延
-            else if (points <= 60)
+            else if (points < 45)
             {
+                // 0 < points < 45: 安全圏 (レベル0相当だがポイントはある状態)
+                currentLevel = 0;
+            }
+            else if (points < 90) // 45 <= points < 90
+            {
+                currentLevel = 1;
+                message = "📢 レベル1: 警告通知";
+            }
+            else if (points < 135) // 90 <= points < 135
+            {
+                currentLevel = 2;
                 message = "⏱️ レベル2: 入力遅延開始";
                 EnableInputDelay();
-                OnNotification?.Invoke($"レベル2: 入力遅延が発生しています。", "警告");
             }
-            // レベル3: グレースケール
-            else if (points <= 100)
+            else if (points < 180) // 135 <= points < 180
             {
+                currentLevel = 3;
                 message = "🎨 レベル3: グレースケール適用";
                 EnableInputDelay();
                 ApplyGrayscale();
-                OnNotification?.Invoke($"レベル3: グレースケール適用中。", "警告");
             }
-            // レベル4: マウス反転
-            else if (points <= 150)
+            else if (points < 225) // 180 <= points < 225
             {
+                currentLevel = 4;
                 message = "🖱️ レベル4: マウス反転開始";
                 EnableInputDelay();
                 ApplyGrayscale();
                 EnableMouseInversion();
-                OnNotification?.Invoke($"レベル4: マウス反転中。", "警告");
             }
-            // レベル5: ビープ音
-            else if (points <= 200)
+            else if (points < 270) // 225 <= points < 270
             {
+                currentLevel = 5;
                 message = "🔔 レベル5: ビープ音";
                 EnableInputDelay();
                 ApplyGrayscale();
                 EnableMouseInversion();
                 await PlayForcedAlertAsync();
             }
-           // レベル6: 画面ロック (201-250pt)
-            else if (points <= 250)
+            else if (points < 315) // 270 <= points < 315
             {
+                currentLevel = 6;
                 message = "🔒 レベル6: 強制画面ロック";
-                OnLog?.Invoke("⚠️ ポイント上限！3秒後に画面をロックします。30秒間は解除できません...");
-                await Task.Delay(3000);
-                // 【変更点】単発ロックではなく、持続ロックメソッドを呼び出す
-                // NativeMethods.LockWorkStation(); // ← 元のコード
-                await EnforcePersistentLockAsync(1); // ← 新しいコード (30秒指定)
-                return;
             }
-            // レベル7: シャットダウン
-            else
+            else // 315 <= points
             {
+                currentLevel = 7;
                 message = "💻 レベル7: 強制シャットダウン";
-                OnLog?.Invoke("⚠️⚠️⚠️ 最終警告！5秒後にシャットダウンします！");
-                await Task.Delay(5000);
-                Process.Start("shutdown", "/s /f /t 0");
-                return;
             }
 
-            OnLog?.Invoke(message);
+            // レベルが変わった時だけ通知を行う
+            if (currentLevel != _lastLevel)
+            {
+                _lastLevel = currentLevel;
+                OnLog?.Invoke(message);
+
+                if (currentLevel == 1)
+                {
+                    OnNotification?.Invoke($"あなたの目標は「{goalSummary}」です。やるべきことに戻りましょう。", "警告");
+                }
+                else if (currentLevel > 1 && currentLevel < 6)
+                {
+                    OnNotification?.Invoke(message, "警告");
+                }
+                else if (currentLevel == 6)
+                {
+                    OnLog?.Invoke("⚠️ ポイント上限！3秒後に画面をロックします。30秒間は解除できません...");
+                    await Task.Delay(3000);
+                    await EnforcePersistentLockAsync(30);
+                }
+                else if (currentLevel == 7)
+                {
+                    OnLog?.Invoke("⚠️⚠️⚠️ 最終警告！5秒後にシャットダウンします！");
+                    await Task.Delay(5000);
+                    Process.Start("shutdown", "/s /f /t 0");
+                }
+            }
         }
 
         public void ResetAllInterventions()

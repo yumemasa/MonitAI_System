@@ -1,0 +1,48 @@
+初めて起動するとき
+①サービスに登録する
+sc.exe create MonitAI_Service binPath= "C:\パス\MonitAI_Service\MonitAI_Service\bin\Release\net8.0\MonitAI_Service.exe"
+②サービスを起動させる
+Start-Service -Name MonitAI_Service
+③再起動や停止無効を機能させる
+sc.exe failure MonitAI_Service reset=0 actions=restart/1000/restart/1000/restart/1000
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\MonitAI_Service" `
+/v AllowStop `
+/t REG_DWORD `
+/d 0 `
+/f
+
+MonitAI_serviceを止める方法
+
+
+PowerShell（管理者）で3つのコードを打つ
+①再起動を停止させる
+sc.exe failure MonitAI_Service reset=0 actions=//
+②停止禁止を解除する
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\MonitAI_Service" `
+/v AllowStop `
+/t REG_DWORD `
+/d 1 `
+/f
+③サービス本体を停止する
+Stop-Service -Name MonitAI_Service -Force
+④もし止まらなかったら
+　taskkill /IM MonitAI_Service.exe /F
+
+上書き
+ヴィジュアルスタジオでソリューション構成を「Release」に変更→ビルド→ソーシャルのビルドを行う
+
+ (Get-WmiObject Win32_Service -Filter "Name='MonitAI_Service'").PathName
+このコードはMonitAI_Service.exeがどこにあるのかを知るコード
+
+MonitAI_Serviceを起動させる
+PowerShell（管理者）で3つのコードを打つ
+①再起動を復活させる
+sc.exe failure MonitAI_Service reset=0 actions=restart/1000/restart/1000/restart/1000
+②停止禁止を復活
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\MonitAI_Service" `
+/v AllowStop `
+/t REG_DWORD `
+/d 0 `
+/f
+③サービスを開始する
+Start-Service -Name MonitAI_Service
