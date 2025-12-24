@@ -282,20 +282,21 @@ namespace MonitAI.UI.Features.MonitoringOverlay
                     using (var fs = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     using (var sr = new StreamReader(fs))
                     {
-                        if (fs.Length > 4000)
+                        // 読み込みサイズを拡大 (4KB -> 64KB)
+                        if (fs.Length > 65536)
                         {
-                            fs.Seek(-4000, SeekOrigin.End);
+                            fs.Seek(-65536, SeekOrigin.End);
                         }
                         string content = sr.ReadToEnd();
-                        var lines = content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
                         
-                        // 最新の8行を表示
-                        int takeCount = 8;
-                        var lastLines = lines.Length > takeCount ? lines[^takeCount..] : lines;
-                        
+                        // 全文表示 (スクロール可能になったため行数制限を撤廃)
                         if (DebugLogText != null)
                         {
-                            DebugLogText.Text = string.Join("\n", lastLines);
+                            // 常に末尾にスクロールさせるために、テキストが変更された場合のみ更新するなどの工夫が必要だが、
+                            // ここでは単純に代入する。ユーザーがスクロール操作中だと戻される可能性があるが、
+                            // リアルタイムログ監視としては許容範囲とする。
+                            DebugLogText.Text = content;
+                            DebugLogText.ScrollToEnd();
                         }
                     }
                 }

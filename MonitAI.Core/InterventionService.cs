@@ -53,14 +53,15 @@ namespace MonitAI.Core
             string message = "";
             int currentLevel = 0;
 
-            if (points <= 0)
-            {
-                currentLevel = 0;
-                if (_lastLevel != 0) ResetAllInterventions();
-                _lastLevel = 0;
-                return;
-            }
-            else if (points < 45)
+            // if (points <= 0)
+            // {
+            //     currentLevel = 0;
+            //     if (_lastLevel != 0) ResetAllInterventions();
+            //     _lastLevel = 0;
+            //     return;
+            // }
+            // else 
+            if (points < 45)
             {
                 // 0 < points < 45: 安全圏 (レベル0相当だがポイントはある状態)
                 currentLevel = 0;
@@ -127,9 +128,9 @@ namespace MonitAI.Core
                 }
                 else if (currentLevel == 6)
                 {
-                    OnLog?.Invoke("⚠️ ポイント上限！3秒後に画面をロックします。30秒間は解除できません...");
+                    OnLog?.Invoke("⚠️ ポイント上限！3秒後に画面をロックします。3秒間は解除できません...");
                     await Task.Delay(3000);
-                    await EnforcePersistentLockAsync(30);
+                    await EnforcePersistentLockAsync(3);
                 }
                 else if (currentLevel == 7)
                 {

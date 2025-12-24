@@ -6,8 +6,8 @@ C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Debug\net8.0-wind
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Debug\net8.0-windows\MonitAI.Core.AssemblyInfoInputs.cache
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Debug\net8.0-windows\MonitAI.Core.AssemblyInfo.cs
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Debug\net8.0-windows\MonitAI.Core.csproj.CoreCompileInputs.cache
+C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Debug\net8.0-windows\MonitAI.Core.sourcelink.json
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Debug\net8.0-windows\MonitAI.Core.dll
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Debug\net8.0-windows\refint\MonitAI.Core.dll
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Debug\net8.0-windows\MonitAI.Core.pdb
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Debug\net8.0-windows\ref\MonitAI.Core.dll
-C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Debug\net8.0-windows\MonitAI.Core.sourcelink.json

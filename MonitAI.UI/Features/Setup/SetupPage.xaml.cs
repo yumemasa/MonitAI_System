@@ -215,7 +215,7 @@ namespace MonitAI.UI.Features.Setup
 
             try
             {
-                UpdateAgentConfig(goalText, ngText);
+                UpdateAgentConfig(goalText, ngText, session.StartTime, session.DurationMinutes);
                 UpdateServiceConfig(session.StartTime, session.DurationMinutes);
                 StartAgentProcess();
             }
@@ -228,7 +228,7 @@ namespace MonitAI.UI.Features.Setup
             StartMonitoringRequested?.Invoke(session);
         }
 
-        private void UpdateAgentConfig(string goal, string ng)
+        private void UpdateAgentConfig(string goal, string ng, DateTime startTime, double durationMinutes)
         {
             string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "screenShot2");
             if (!Directory.Exists(appData)) Directory.CreateDirectory(appData);
@@ -247,8 +247,20 @@ namespace MonitAI.UI.Features.Setup
 
             settings["Rules"] = $"目標: {goal}\n禁止: {ng}";
             
-            if (!settings.ContainsKey("ApiKey")) settings["ApiKey"] = ""; 
-            if (!settings.ContainsKey("CliPath")) settings["CliPath"] = @"C:\nvm4w\nodejs\gemini.cmd";
+            // API Key & Mode & Model は SettingsPage で設定するため、ここでは上書きしない
+            // ただし、初回起動時などでキーが存在しない場合はデフォルト値を入れる
+            if (!settings.ContainsKey("ApiKey")) settings["ApiKey"] = "";
+            if (!settings.ContainsKey("UseApi")) settings["UseApi"] = "False";
+            if (!settings.ContainsKey("Model")) settings["Model"] = "gemini-2.5-flash-lite";
+
+            // EndTime for Agent auto-stop
+            DateTime endTime = startTime.AddMinutes(durationMinutes);
+            settings["EndTime"] = endTime.ToString("o"); // ISO 8601 format
+
+            // 常に正しいパスで上書きする (動的パスに変更)
+            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            settings["CliPath"] = Path.Combine(userProfile, @"AppData\Roaming\npm\gemini.cmd");
+            
             if (!settings.ContainsKey("Model")) settings["Model"] = "gemini-2.5-flash-lite";
 
             File.WriteAllText(configPath, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }));
@@ -256,8 +268,15 @@ namespace MonitAI.UI.Features.Setup
 
         private void UpdateServiceConfig(DateTime startTime, double durationMinutes)
         {
-            string serviceConfigPath = @"c:\Users\it222104\source\repos\MonitAI_System\MonitAIサービス完成版\settings.json";
+            // 動的パスに変更 (リポジトリルートを探す簡易的なロジック)
+            // 注意: 開発環境と本番環境でパス構成が異なる場合は、設定ファイルやレジストリで管理するのが望ましいが、
+            // ここではユーザープロファイル配下の source\repos を基準にする。
+            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string serviceConfigPath = Path.Combine(userProfile, @"source\repos\MonitAI_System\MonitAIサービス完成版\settings.json");
+            
             DateTime endTime = startTime.AddMinutes(durationMinutes);
+
+            string agentPath = Path.Combine(userProfile, @"source\repos\MonitAI_System\MonitAI.Agent\bin\Debug\net8.0-windows\MonitAI.Agent.exe");
 
             var config = new
             {
@@ -268,7 +287,7 @@ namespace MonitAI.UI.Features.Setup
                     StartTime = startTime.ToString("HH:mm"),
                     EndTime = endTime.ToString("HH:mm"),
                     ProcessName = "MonitAI.Agent",
-                    ProcessPath = @"c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\bin\Debug\net8.0-windows\MonitAI.Agent.exe"
+                    ProcessPath = agentPath
                 }
             };
 
@@ -277,7 +296,9 @@ namespace MonitAI.UI.Features.Setup
 
         private void StartAgentProcess()
         {
-            string agentPath = @"c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\bin\Debug\net8.0-windows\MonitAI.Agent.exe";
+            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string agentPath = Path.Combine(userProfile, @"source\repos\MonitAI_System\MonitAI.Agent\bin\Debug\net8.0-windows\MonitAI.Agent.exe");
+            
             if (File.Exists(agentPath))
             {
                 Process.Start(new ProcessStartInfo

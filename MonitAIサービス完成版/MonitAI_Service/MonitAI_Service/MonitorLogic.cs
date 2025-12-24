@@ -11,7 +11,7 @@ namespace MonitAI_Service
         // 設定ファイル
         // ==============================
         private readonly string _configPath =
-            Path.Combine(AppContext.BaseDirectory, "C:\\Users\\it222187\\Desktop\\settings.json");
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"source\repos\MonitAI_System\MonitAIサービス完成版\settings.json");
 
         private DateTime _lastConfigWriteTime = DateTime.MinValue;
 
@@ -19,7 +19,7 @@ namespace MonitAI_Service
         // 監視対象
         // ==============================
         private string _processName = "MonitAI_App";
-        private string _processPath = @"C:\path\to\MonitAI_App.exe";
+        private string _processPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"source\repos\MonitAI_System\MonitAI.Agent\bin\Debug\net8.0-windows\MonitAI.Agent.exe");
 
         // ==============================
         // 監視日付
@@ -45,21 +45,47 @@ namespace MonitAI_Service
         {
             ReloadConfigIfNeeded();
 
-            if (!IsMonitoringTime())
-                return;
+            bool isTime = IsMonitoringTime();
 
             try
             {
                 var processes = Process.GetProcessesByName(_processName);
-                if (processes.Length == 0)
-                {
-                    Process.Start(_processPath);
 
-                    EventLog.WriteEntry(
-                        "MonitAI_Service",
-                        $"{_processName} was not running. Restarted.",
-                        EventLogEntryType.Warning
-                    );
+                if (isTime)
+                {
+                    // 監視時間内なのに起動していない -> 起動する
+                    if (processes.Length == 0)
+                    {
+                        Process.Start(_processPath);
+
+                        EventLog.WriteEntry(
+                            "MonitAI_Service",
+                            $"{_processName} was not running. Restarted.",
+                            EventLogEntryType.Warning
+                        );
+                    }
+                }
+                else
+                {
+                    // 監視時間外なのに起動している -> 終了させる
+                    if (processes.Length > 0)
+                    {
+                        foreach (var p in processes)
+                        {
+                            try
+                            {
+                                p.Kill(); // 強制終了
+                                p.WaitForExit(3000); // 最大3秒待つ
+                            }
+                            catch { }
+                        }
+
+                        EventLog.WriteEntry(
+                            "MonitAI_Service",
+                            $"{_processName} was running outside monitoring hours. Terminated.",
+                            EventLogEntryType.Information
+                        );
+                    }
                 }
             }
             catch (Exception ex)
@@ -138,7 +164,7 @@ namespace MonitAI_Service
                     _processName = name.GetString();
 
                 if (root.TryGetProperty("ProcessPath", out var path))
-                    _processPath = path.GetString();
+                    _processPath = Environment.ExpandEnvironmentVariables(path.GetString());
             }
             catch
             {

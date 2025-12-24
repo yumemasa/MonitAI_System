@@ -28,8 +28,10 @@ namespace MonitAI.Agent
         // 設定値
         private string _apiKey = "";
         private string _rules = "";
-        private string _cliPath = @"C:\nvm4w\nodejs\gemini.cmd";
+        private string _cliPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"npm\gemini.cmd");
         private string _selectedModel = "gemini-2.5-flash-lite"; // デフォルト
+        private DateTime? _endTime = null; // 終了時刻
+        private bool _useApi = false; // APIモードかどうか
 
         // ログファイルのパス
         private string LogPath => Path.Combine(
@@ -47,13 +49,20 @@ namespace MonitAI.Agent
             InitializeServices();
             SetupTrayIcon();
 
-            if (!string.IsNullOrWhiteSpace(_apiKey) && !string.IsNullOrWhiteSpace(_rules))
+            // APIモードの場合はAPIキー必須、CLIモードの場合はAPIキー不要（環境変数やgcloud認証を利用想定）
+            bool isConfigValid = !string.IsNullOrWhiteSpace(_rules);
+            if (_useApi)
+            {
+                isConfigValid = isConfigValid && !string.IsNullOrWhiteSpace(_apiKey);
+            }
+
+            if (isConfigValid)
             {
                 StartMonitoring();
             }
             else
             {
-                string msg = "設定不足: APIキーまたはルールがありません";
+                string msg = _useApi ? "設定不足: APIキーまたはルールがありません" : "設定不足: ルールが設定されていません";
                 WriteLog(msg);
                 ShowNotification("設定不足", msg);
             }
@@ -89,12 +98,17 @@ namespace MonitAI.Agent
 
                 _geminiService = new GeminiService();
                 _geminiService.GeminiCliCommand = _cliPath;
+                _geminiService.UseGeminiCli = !_useApi; // 設定反映
 
                 WriteLog($"CLIパス: {_cliPath}");
                 WriteLog($"使用モデル: {_selectedModel}"); // ログ確認用
+                WriteLog($"モード: {(_useApi ? "API" : "CLI")}");
 
                 bool cliOk = await _geminiService.CheckCliConnectionAsync();
-                WriteLog(cliOk ? "✅ CLI接続OK" : "❌ CLI接続失敗 (設定を確認してください)");
+                if (!_useApi)
+                {
+                    WriteLog(cliOk ? "✅ CLI接続OK" : "❌ CLI接続失敗 (設定を確認してください)");
+                }
 
                 _interventionService = new InterventionService();
                 _interventionService.OnLog += msg => WriteLog($"[介入] {msg}");
@@ -172,7 +186,8 @@ namespace MonitAI.Agent
             // ★修正: 固定文字列ではなく、設定から読み込んだモデルを使用
             var result = await _geminiService.AnalyzeAsync(files, _rules, _apiKey, _selectedModel);
 
-            WriteLog($"Gemini応答 ({result.Source}): {result.RawText.Replace("\n", " ").Substring(0, Math.Min(50, result.RawText.Length))}...");
+            // ログに全文を出力するように変更
+            WriteLog($"Gemini応答 ({result.Source}): {result.RawText}");
 
             HandleAnalysisResult(result);
 
@@ -245,6 +260,19 @@ namespace MonitAI.Agent
 
                         // ★追加: UIで保存したモデル設定を読み込む
                         if (settings.TryGetValue("Model", out var model)) _selectedModel = model;
+
+                        // ★追加: APIモード設定
+                        if (settings.TryGetValue("UseApi", out var useApiStr) && bool.TryParse(useApiStr, out var useApi))
+                        {
+                            _useApi = useApi;
+                        }
+
+                        // ★追加: 終了時刻を読み込む
+                        if (settings.TryGetValue("EndTime", out var endTimeStr) && DateTime.TryParse(endTimeStr, out var et))
+                        {
+                            _endTime = et;
+                            WriteLog($"終了予定時刻: {_endTime:HH:mm:ss}");
+                        }
 
                         WriteLog("設定読み込み完了");
                     }

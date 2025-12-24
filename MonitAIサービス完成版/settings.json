@@ -1,33 +1,10 @@
 {
   "Monitoring": {
-    "StartDate": "2025-12-23",
-    "EndDate": "2025-12-23",
-    "StartTime": "12:11",
-    "EndTime": "12:56",
+    "StartDate": "2025-12-24",
+    "EndDate": "2025-12-24",
+    "StartTime": "16:50",
+    "EndTime": "16:55",
     "ProcessName": "MonitAI.Agent",
-    "ProcessPath": "c:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI.Agent\\bin\\Debug\\net8.0-windows\\MonitAI.Agent.exe"
+    "ProcessPath": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI.Agent\\bin\\Debug\\net8.0-windows\\MonitAI.Agent.exe"
   }
 }
-
-
-// 現時点の不安
-
-// ＞ポイントをどのように実現したか
-
-// 他の介入系にも適応できていますか？
-// UIでは目標との逸脱行動が検知されるとポイントが増え水がたまります。
-// その後、満帆になる際に表示されていたペナルティが課されます。
-// すると次のペナルティ内容が表示されます。現在のコードだと、
-// つぎのペナルティが表示されていても、その前の
-
-// cliが正常に動くか。(遅くても)
-// gemini APIかgemini cli選択できない。
-
-// 動きがわからないか
-// 通知の動きがよくない。
-// 正常に動作しているかもわからない。
-// なぜ違反になったのかが書いていない。
-
-// UI上で登録された目標はどのように保存されているのか。
-// そして、gemini用のプロンプトとして、送信されているのか。
-//現時点でCLIは全くと言っていいほど動作しない。原因がわからない。
