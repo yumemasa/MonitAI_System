@@ -112,7 +112,7 @@ namespace MonitAI.UI.Features.Main {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/MonitAI.UI;V1.0.0.0;component/features/main/mainwindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/MonitAI.UI;component/features/main/mainwindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\Features\Main\MainWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

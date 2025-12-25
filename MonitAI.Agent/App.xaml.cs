@@ -85,7 +85,7 @@ namespace MonitAI.Agent
         private async void InitializeServices()
         {
             try
-            {
+            {                SetupCommandWatcher();
                 _screenshotService = new ScreenshotService();
 
                 // モニター情報をログ出力 (移植漏れの補完)
@@ -117,6 +117,78 @@ namespace MonitAI.Agent
             catch (Exception ex)
             {
                 WriteLog($"初期化エラー: {ex.Message}");
+            }
+        }
+
+        private FileSystemWatcher? _commandWatcher;
+
+        private void SetupCommandWatcher()
+        {
+            try
+            {
+                string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "screenShot2");
+                if (!Directory.Exists(appData)) Directory.CreateDirectory(appData);
+
+                _commandWatcher = new FileSystemWatcher(appData, "command.json");
+                _commandWatcher.Created += (s, e) => CheckForCommands();
+                _commandWatcher.Changed += (s, e) => CheckForCommands();
+                _commandWatcher.EnableRaisingEvents = true;
+            }
+            catch { }
+        }
+
+        private bool _isProcessingCommand = false;
+
+        private async void CheckForCommands()
+        {
+            if (_isProcessingCommand) return;
+            _isProcessingCommand = true;
+
+            try
+            {
+                // ファイルロック回避 & デバウンス (短縮)
+                await Task.Delay(200);
+
+                string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "screenShot2");
+                string commandPath = Path.Combine(appData, "command.json");
+
+                if (File.Exists(commandPath))
+                {
+                    string json = await File.ReadAllTextAsync(commandPath);
+                    
+                    // 読み込み直後に削除して二重実行防止
+                    try { File.Delete(commandPath); } catch { }
+
+                    using var doc = JsonDocument.Parse(json);
+                    if (doc.RootElement.TryGetProperty("Command", out var cmdProp) && cmdProp.GetString() == "AddPoints")
+                    {
+                        if (doc.RootElement.TryGetProperty("Value", out var valProp))
+                        {
+                            int points = valProp.GetInt32();
+                            
+                            // ★重要: フック(SetWindowsHookEx)を機能させるため、必ずUIスレッド(メッセージループを持つスレッド)で実行する
+                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                _violationPoints += points;
+                                WriteLog($"[Command] ポイント追加: +{points}pt -> 現在:{_violationPoints}pt");
+                                
+                                // 即座に反映
+                                UpdateStatusFile(_violationPoints);
+                                string goalSummary = _rules.Split('\n').FirstOrDefault() ?? "目標";
+                                _ = _interventionService?.ApplyLevelAsync(_violationPoints, goalSummary);
+                                // ShowNotification("デバッグ", $"ポイント追加: +{points}pt");
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteLog($"コマンド処理エラー: {ex.Message}");
+            }
+            finally
+            {
+                _isProcessingCommand = false;
             }
         }
 

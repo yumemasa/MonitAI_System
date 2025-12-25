@@ -74,20 +74,20 @@ namespace MonitAI.Core
             else if (points < 135) // 90 <= points < 135
             {
                 currentLevel = 2;
-                message = "⏱️ レベル2: 入力遅延開始";
-                EnableInputDelay();
+                message = "🎨 レベル2: グレースケール適用";
+                ApplyGrayscale();
             }
             else if (points < 180) // 135 <= points < 180
             {
                 currentLevel = 3;
-                message = "🎨 レベル3: グレースケール適用";
+                message = "⏱️ レベル3: 入力遅延開始";
                 EnableInputDelay();
-                ApplyGrayscale();
+                ApplyGrayscale(); // レベル3でもグレースケールを維持
             }
             else if (points < 225) // 180 <= points < 225
             {
                 currentLevel = 4;
-                message = "🖱️ レベル4: マウス反転開始";
+                message = "🖱️ レベル4: カーソル反転開始";
                 EnableInputDelay();
                 ApplyGrayscale();
                 EnableMouseInversion();
@@ -160,12 +160,22 @@ namespace MonitAI.Core
                 {
                     if (curModule != null)
                     {
+                        // モジュール名が取得できない場合があるため、nullチェックを強化
+                        string moduleName = curModule.ModuleName ?? "MonitAI.Agent.exe";
+                        
                         _keyboardHookID = NativeMethods.SetWindowsHookEx(NativeMethods.WH_KEYBOARD_LL, _keyboardProc!,
-                            NativeMethods.GetModuleHandle(curModule.ModuleName), 0);
+                            NativeMethods.GetModuleHandle(moduleName), 0);
+                            
                         if (_keyboardHookID != IntPtr.Zero)
                         {
                             _isDelayEnabled = true;
                             OnLog?.Invoke("入力遅延を有効化しました");
+                        }
+                        else
+                        {
+                            // エラーコードを取得してログ出力
+                            int errorCode = Marshal.GetLastWin32Error();
+                            OnLog?.Invoke($"フック設定失敗: Error {errorCode}");
                         }
                     }
                 }

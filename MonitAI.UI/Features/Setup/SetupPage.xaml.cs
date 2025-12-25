@@ -247,6 +247,13 @@ namespace MonitAI.UI.Features.Setup
 
             settings["Rules"] = $"目標: {goal}\n禁止: {ng}";
             
+            // 状態リセット (前回のポイント引き継ぎ防止)
+            string statusPath = Path.Combine(appData, "status.json");
+            if (File.Exists(statusPath)) File.Delete(statusPath);
+
+            string logPath = Path.Combine(appData, "agent_log.txt");
+            if (File.Exists(logPath)) File.Delete(logPath);
+
             // API Key & Mode & Model は SettingsPage で設定するため、ここでは上書きしない
             // ただし、初回起動時などでキーが存在しない場合はデフォルト値を入れる
             if (!settings.ContainsKey("ApiKey")) settings["ApiKey"] = "";
@@ -258,8 +265,8 @@ namespace MonitAI.UI.Features.Setup
             settings["EndTime"] = endTime.ToString("o"); // ISO 8601 format
 
             // 常に正しいパスで上書きする (動的パスに変更)
-            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            settings["CliPath"] = Path.Combine(userProfile, @"AppData\Roaming\npm\gemini.cmd");
+            string appDataRoaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            settings["CliPath"] = Path.Combine(appDataRoaming, @"npm\gemini.cmd");
             
             if (!settings.ContainsKey("Model")) settings["Model"] = "gemini-2.5-flash-lite";
 
@@ -268,15 +275,18 @@ namespace MonitAI.UI.Features.Setup
 
         private void UpdateServiceConfig(DateTime startTime, double durationMinutes)
         {
-            // 動的パスに変更 (リポジトリルートを探す簡易的なロジック)
-            // 注意: 開発環境と本番環境でパス構成が異なる場合は、設定ファイルやレジストリで管理するのが望ましいが、
-            // ここではユーザープロファイル配下の source\repos を基準にする。
-            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            string serviceConfigPath = Path.Combine(userProfile, @"source\repos\MonitAI_System\MonitAIサービス完成版\settings.json");
+            string solutionRoot = GetSolutionRoot();
+            if (string.IsNullOrEmpty(solutionRoot))
+            {
+                System.Diagnostics.Debug.WriteLine("Solution root not found.");
+                return;
+            }
+
+            string serviceConfigPath = Path.Combine(solutionRoot, @"MonitAIサービス完成版\settings.json");
             
             DateTime endTime = startTime.AddMinutes(durationMinutes);
 
-            string agentPath = Path.Combine(userProfile, @"source\repos\MonitAI_System\MonitAI.Agent\bin\Debug\net8.0-windows\MonitAI.Agent.exe");
+            string agentPath = GetAgentPath();
 
             var config = new
             {
@@ -287,25 +297,41 @@ namespace MonitAI.UI.Features.Setup
                     StartTime = startTime.ToString("HH:mm"),
                     EndTime = endTime.ToString("HH:mm"),
                     ProcessName = "MonitAI.Agent",
-                    ProcessPath = agentPath
+                    ProcessPath = agentPath ?? ""
                 }
             };
 
-            File.WriteAllText(serviceConfigPath, JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true }));
+            try
+            {
+                string dir = Path.GetDirectoryName(serviceConfigPath);
+                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+                File.WriteAllText(serviceConfigPath, JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true }));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error updating service config: {ex.Message}");
+            }
         }
 
         private void StartAgentProcess()
         {
-            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            string agentPath = Path.Combine(userProfile, @"source\repos\MonitAI_System\MonitAI.Agent\bin\Debug\net8.0-windows\MonitAI.Agent.exe");
+            string agentPath = GetAgentPath();
             
-            if (File.Exists(agentPath))
+            if (!string.IsNullOrEmpty(agentPath) && File.Exists(agentPath))
             {
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = agentPath,
                     UseShellExecute = true
                 });
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Agent not found at: {agentPath}");
+                _snackbarService?.Show("エラー", "Agentが見つかりませんでした。", ControlAppearance.Danger, new SymbolIcon(SymbolRegular.ErrorCircle24), TimeSpan.FromSeconds(3));
             }
         }
 
@@ -890,6 +916,35 @@ namespace MonitAI.UI.Features.Setup
         /// <summary>
         /// ユーザーデータを保存します。
         /// </summary>
+        private string GetSolutionRoot()
+        {
+            string current = AppDomain.CurrentDomain.BaseDirectory;
+            while (!string.IsNullOrEmpty(current))
+            {
+                if (File.Exists(Path.Combine(current, "MonitAI_System.sln")))
+                {
+                    return current;
+                }
+                current = Directory.GetParent(current)?.FullName;
+            }
+            return null;
+        }
+
+        private string GetAgentPath()
+        {
+            string solutionRoot = GetSolutionRoot();
+            if (string.IsNullOrEmpty(solutionRoot)) return null;
+
+            string configName = "Release";
+#if DEBUG
+            configName = "Debug";
+#endif
+            // BaseDirectoryの末尾がフレームワーク名になっていると仮定 (例: net8.0-windows)
+            string frameworkName = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).Name;
+            
+            return Path.Combine(solutionRoot, "MonitAI.Agent", "bin", configName, frameworkName, "MonitAI.Agent.exe");
+        }
+
         public void SaveUserData()
         {
             try

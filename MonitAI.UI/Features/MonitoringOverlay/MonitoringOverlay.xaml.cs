@@ -77,6 +77,10 @@ namespace MonitAI.UI.Features.MonitoringOverlay
             _currentSession = session;
             _currentPenaltyLevel = 1;
             _currentPoints = 0;
+            
+            // UI上のポイント表示もリセット
+            AnimateLiquid(0.0);
+            if (DebugLogText != null) DebugLogText.Text = "";
 
             UpdateGoalDisplay();
             UpdatePenaltyDisplay();
@@ -442,28 +446,19 @@ namespace MonitAI.UI.Features.MonitoringOverlay
 
         private async Task DebugAddPoints()
         {
-            int nextPoints = _currentPoints + 15;
-
-            if (nextPoints >= PointsPerLevel)
+            // Agentにコマンド送信
+            try
             {
-                _currentPoints = PointsPerLevel;
-                AnimateLiquid(1.0);
+                string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "screenShot2");
+                string commandPath = Path.Combine(appData, "command.json");
 
-                if (_currentPenaltyLevel < 7)
-                {
-                    _currentPenaltyLevel++;
-                    UpdatePenaltyDisplay();
-                    ShakeMonitor();
-                }
-
-                await Task.Delay(ShakeAnimationDelayMs);
-                _currentPoints = 0;
-                AnimateLiquid(0.0);
+                var command = new { Command = "AddPoints", Value = 15 };
+                string json = JsonSerializer.Serialize(command);
+                await File.WriteAllTextAsync(commandPath, json);
             }
-            else
+            catch (Exception ex)
             {
-                _currentPoints = nextPoints;
-                AnimateLiquid((double)_currentPoints / PointsPerLevel);
+                System.Diagnostics.Debug.WriteLine($"Debug Command Error: {ex.Message}");
             }
         }
 
