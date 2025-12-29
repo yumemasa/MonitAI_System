@@ -108,11 +108,13 @@ namespace MonitAI.UI.Features.MonitoringOverlay
             {
                 NormalMonitorLayout.Visibility = Visibility.Collapsed;
                 MiniMonitorLayout.Visibility = Visibility.Visible;
+                if (DebugLogContainer != null) DebugLogContainer.Visibility = Visibility.Collapsed;
             }
             else
             {
                 NormalMonitorLayout.Visibility = Visibility.Visible;
                 MiniMonitorLayout.Visibility = Visibility.Collapsed;
+                if (DebugLogContainer != null) DebugLogContainer.Visibility = Visibility.Visible;
             }
         }
 
@@ -233,11 +235,10 @@ namespace MonitAI.UI.Features.MonitoringOverlay
             {
                 1 => (SymbolRegular.Alert24, "通知 (警告)", "#80DEEA"),
                 2 => (SymbolRegular.Color24, "グレースケール化", "#26C6DA"),
-                3 => (SymbolRegular.Keyboard24, "入力遅延", "#FFEE58"),
-                4 => (SymbolRegular.CursorHover24, "カーソル反転", "#FFA726"),
-                5 => (SymbolRegular.Speaker224, "ビープ音", "#EF5350"),
-                6 => (SymbolRegular.LockClosed24, "画面ロック", "#C62828"),
-                7 => (SymbolRegular.Power24, "シャットダウン", "#4A0000"),
+                3 => (SymbolRegular.Warning24, "操作妨害", "#FFA726"),
+                4 => (SymbolRegular.Speaker224, "ビープ音", "#EF5350"),
+                5 => (SymbolRegular.LockClosed24, "画面ロック", "#C62828"),
+                6 => (SymbolRegular.Power24, "シャットダウン", "#4A0000"),
                 _ => (SymbolRegular.Checkmark24, "不明", "#808080")
             };
         }
@@ -302,6 +303,13 @@ namespace MonitAI.UI.Features.MonitoringOverlay
                             DebugLogText.Text = content;
                             DebugLogText.ScrollToEnd();
                         }
+                    }
+                }
+                else
+                {
+                    if (DebugLogText != null && string.IsNullOrEmpty(DebugLogText.Text))
+                    {
+                        DebugLogText.Text = "Waiting for agent log...";
                     }
                 }
             }
@@ -531,6 +539,22 @@ namespace MonitAI.UI.Features.MonitoringOverlay
             if (e.ButtonState == MouseButtonState.Pressed)
             {
                 DragMoveRequested?.Invoke(this, e);
+            }
+        }
+
+        private void OnDebugLogToggleClick(object sender, RoutedEventArgs e)
+        {
+            if (DebugLogPanel.Visibility == Visibility.Collapsed)
+            {
+                // 展開
+                DebugLogPanel.Visibility = Visibility.Visible;
+                DebugLogToggleBtn.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                // 縮小
+                DebugLogPanel.Visibility = Visibility.Collapsed;
+                DebugLogToggleBtn.Visibility = Visibility.Visible;
             }
         }
 

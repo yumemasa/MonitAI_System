@@ -237,17 +237,38 @@
         </Grid>
 
         <!-- Debug Log Overlay -->
-        <Border VerticalAlignment="Bottom" HorizontalAlignment="Left" 
-                Background="#CC000000" Margin="20" Padding="10" CornerRadius="8"
-                IsHitTestVisible="True" MaxWidth="600" MaxHeight="300">
-            <StackPanel>
-                <TextBlock Text="Agent Debug Log" Foreground="#AAAAAA" FontSize="10" Margin="0,0,0,4"/>
-                <TextBox x:Name="DebugLogText" Foreground="#00FF00" FontSize="11" 
-                           FontFamily="Consolas" TextWrapping="Wrap"
-                           Background="Transparent" BorderThickness="0"
-                           IsReadOnly="True" VerticalScrollBarVisibility="Auto"
-                           Height="200" Width="580"/>
-            </StackPanel>
-        </Border>
+        <StackPanel x:Name="DebugLogContainer" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="20">
+            <!-- Toggle Button (Visible when collapsed) -->
+            <ui:Button x:Name="DebugLogToggleBtn" 
+                       Content="LOG" 
+                       Appearance="Secondary"
+                       Click="OnDebugLogToggleClick"
+                       Visibility="Visible"
+                       HorizontalAlignment="Right"/>
+
+            <!-- Log Panel (Visible when expanded) -->
+            <Border x:Name="DebugLogPanel" 
+                    Background="#CC000000" CornerRadius="8" Padding="10"
+                    Visibility="Collapsed"
+                    MaxWidth="600" MaxHeight="300"
+                    Margin="0,4,0,0">
+                <StackPanel>
+                    <Grid Margin="0,0,0,4">
+                        <TextBlock Text="Agent Debug Log" Foreground="#AAAAAA" FontSize="10" VerticalAlignment="Center"/>
+                        <ui:Button Icon="{ui:SymbolIcon Dismiss24}" 
+                                   Appearance="Transparent" 
+                                   HorizontalAlignment="Right"
+                                   Click="OnDebugLogToggleClick" 
+                                   Padding="0" Height="20" Width="20"
+                                   Foreground="#AAAAAA"/>
+                    </Grid>
+                    <TextBox x:Name="DebugLogText" Foreground="#00FF00" FontSize="11" 
+                               FontFamily="Consolas" TextWrapping="Wrap"
+                               Background="Transparent" BorderThickness="0"
+                               IsReadOnly="True" VerticalScrollBarVisibility="Auto"
+                               Height="200" Width="580"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
     </Grid>
 </UserControl>
