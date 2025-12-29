@@ -15,6 +15,7 @@ namespace MonitAI.Core
     {
         public string RawText { get; set; } = "";
         public bool IsViolation { get; set; }
+        public string Reason { get; set; } = "";
         public string Source { get; set; } = "Unknown"; // "CLI" or "API"
     }
 
@@ -44,6 +45,7 @@ namespace MonitAI.Core
                 {
                     result.RawText = cliOutput;
                     result.IsViolation = IsViolationDetected(cliOutput);
+                    result.Reason = ExtractReason(cliOutput);
                     result.Source = "CLI";
                     return result;
                 }
@@ -59,6 +61,7 @@ namespace MonitAI.Core
             string apiOutput = await AnalyzeWithApiAsync(imagePaths, userRules, apiKey, modelName);
             result.RawText = apiOutput;
             result.IsViolation = IsViolationDetected(apiOutput);
+            result.Reason = ExtractReason(apiOutput);
             result.Source = "API";
 
             return result;
@@ -235,6 +238,17 @@ namespace MonitAI.Core
 ";
 
 
+        }
+
+        private string ExtractReason(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return "";
+            var match = Regex.Match(text, @"(?:理由|Reason)\s*[:：]\s*(.*)", RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                return match.Groups[1].Value.Trim();
+            }
+            return "";
         }
 
         private bool IsViolationDetected(string text)
