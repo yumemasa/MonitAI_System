@@ -170,7 +170,9 @@ namespace MonitAI.Agent
                             System.Windows.Application.Current.Dispatcher.Invoke(() =>
                             {
                                 _violationPoints += points;
-                                WriteLog($"[Command] ポイント追加: +{points}pt -> 現在:{_violationPoints}pt");
+                                if (_violationPoints < 0) _violationPoints = 0; // 0未満にならないようにする
+
+                                WriteLog($"[Command] ポイント操作: {points:+#;-#;0}pt -> 現在:{_violationPoints}pt");
                                 
                                 // 即座に反映
                                 UpdateStatusFile(_violationPoints);
@@ -275,7 +277,13 @@ namespace MonitAI.Agent
                 // ★修正: 1回の違反で +15 ポイント
                 _violationPoints += 15;
                 WriteLog($"⚠️ 違反判定! (+15pt) 現在:{_violationPoints}pt");
-                ShowNotification("違反検知", $"ポイント: {_violationPoints}");
+
+                string msg = $"ポイント: {_violationPoints}";
+                if (!string.IsNullOrWhiteSpace(result.Reason))
+                {
+                    msg += $"\n理由: {result.Reason}";
+                }
+                ShowNotification("違反検知", msg);
             }
             else
             {

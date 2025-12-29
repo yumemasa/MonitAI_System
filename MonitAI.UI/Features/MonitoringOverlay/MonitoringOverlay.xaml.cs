@@ -65,7 +65,32 @@ namespace MonitAI.UI.Features.MonitoringOverlay
         public MonitoringOverlay()
         {
             InitializeComponent();
+            this.Loaded += (s, e) => this.Focus(); // フォーカスを設定してキー入力を受け付ける
+            this.PreviewKeyDown += OnPreviewKeyDown;
         }
+
+        private void OnPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // Ctrl + Up -> +15pt
+            if (e.Key == Key.Up && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                _ = DebugAddPoints();
+                e.Handled = true;
+            }
+            // Ctrl + Down -> -15pt
+            else if (e.Key == Key.Down && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                _ = DebugSubtractPoints();
+                e.Handled = true;
+            }
+            // Ctrl + Q -> 終了
+            else if (e.Key == Key.Q && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                DebugFinishSession();
+                e.Handled = true;
+            }
+        }
+
 
         /// <summary>
         /// セッションを初期化します。
@@ -461,6 +486,24 @@ namespace MonitAI.UI.Features.MonitoringOverlay
                 string commandPath = Path.Combine(appData, "command.json");
 
                 var command = new { Command = "AddPoints", Value = 15 };
+                string json = JsonSerializer.Serialize(command);
+                await File.WriteAllTextAsync(commandPath, json);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Debug Command Error: {ex.Message}");
+            }
+        }
+
+        private async Task DebugSubtractPoints()
+        {
+            // Agentにコマンド送信 (-15pt)
+            try
+            {
+                string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "screenShot2");
+                string commandPath = Path.Combine(appData, "command.json");
+
+                var command = new { Command = "AddPoints", Value = -15 };
                 string json = JsonSerializer.Serialize(command);
                 await File.WriteAllTextAsync(commandPath, json);
             }

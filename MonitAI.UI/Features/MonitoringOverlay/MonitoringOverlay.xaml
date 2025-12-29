@@ -5,7 +5,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     mc:Ignorable="d"
-    d:DesignHeight="760" d:DesignWidth="1000">
+    d:DesignHeight="760" d:DesignWidth="1000"
+    Focusable="True">
 
     <UserControl.Resources>
         <SolidColorBrush x:Key="MonitoringBackgroundBrush" Color="#202020"/>
@@ -153,14 +154,8 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <ui:Button Content="+15pt" Appearance="Secondary" Margin="0,0,8,0"
-                                   Click="OnDebugAddPointsClick" />
-
                         <ui:Button Content="ミニモード" Icon="{ui:SymbolIcon ArrowMinimize24}" 
                                    Appearance="Secondary" Click="OnToggleMiniModeClick" />
-
-                        <ui:Button Content="終了" Appearance="Danger" Margin="8,0,0,0" 
-                                   Click="OnStopSessionClick" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -237,7 +232,7 @@
         </Grid>
 
         <!-- Debug Log Overlay -->
-        <StackPanel x:Name="DebugLogContainer" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="20">
+        <StackPanel x:Name="DebugLogContainer" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="20,50,20,0">
             <!-- Toggle Button (Visible when collapsed) -->
             <ui:Button x:Name="DebugLogToggleBtn" 
                        Content="LOG" 
