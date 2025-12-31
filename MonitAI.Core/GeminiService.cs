@@ -16,10 +16,10 @@ namespace MonitAI.Core
         public string RawText { get; set; } = "";
         public bool IsViolation { get; set; }
         public string Reason { get; set; } = "";
-        public string Source { get; set; } = "Unknown"; // "CLI" or "API"
+        public string Source { get; set; } = "Unknown"; // "CLI", "API", or "ACP"
     }
 
-    public class GeminiService
+    public class GeminiService : IDisposable
     {
         private static readonly HttpClient _httpClient = new HttpClient();
 
@@ -27,8 +27,37 @@ namespace MonitAI.Core
         public string GeminiCliCommand { get; set; } = "gemini";
         public bool UseGeminiCli { get; set; } = true;
 
+        // --- ACP (常駐) モード用フィールド ---
+        private Process? _process;
+        private StreamWriter? _stdin;
+        private Action<string>? _logger;
+        private int _requestId = 1;
+        private readonly Dictionary<int, TaskCompletionSource<JsonElement>> _pendingRequests = new();
+        private string? _sessionId;
+        private const int RPC_TIMEOUT = 120000; // 120秒
+        private StringBuilder _responseBuffer = new StringBuilder();
+        
+        // 応答待ち用
+        private TaskCompletionSource<string>? _currentResponseTcs;
+
+        public bool IsRunning => _process != null && !_process.HasExited;
+
+        public GeminiService(Action<string>? logger = null)
+        {
+            _logger = logger;
+        }
+
+        /// <summary>
+        /// 解析のメインエントリポイント。常駐モードが有効ならそちらを優先します。
+        /// </summary>
         public async Task<GeminiAnalysisResult> AnalyzeAsync(List<string> imagePaths, string userRules, string apiKey, string modelName)
         {
+            // 1. 常駐プロセス(ACP)が起動していればそちらを使用
+            if (IsRunning)
+            {
+                return await AnalyzeWithSessionAsync(imagePaths, userRules);
+            }
+
             var result = new GeminiAnalysisResult();
 
             if (imagePaths == null || imagePaths.Count == 0)
@@ -37,7 +66,7 @@ namespace MonitAI.Core
                 return result;
             }
 
-            // 1. CLIでの実行を試みる
+            // 2. CLIでの実行を試みる (One-shot)
             if (UseGeminiCli)
             {
                 string? cliOutput = await AnalyzeWithCliAsync(imagePaths, userRules);
@@ -51,7 +80,7 @@ namespace MonitAI.Core
                 }
             }
 
-            // 2. APIへのフォールバック
+            // 3. APIへのフォールバック
             if (string.IsNullOrWhiteSpace(apiKey))
             {
                 result.RawText = "APIキーが設定されておらず、CLI実行も失敗しました。";
@@ -66,6 +95,274 @@ namespace MonitAI.Core
 
             return result;
         }
+
+        // --- ACP (常駐) モードの実装 ---
+
+        public async Task<bool> StartAsync(string workingDir, string nodePath = "", string scriptPath = "")
+        {
+            try
+            {
+                // パスの自動解決
+                if (string.IsNullOrEmpty(nodePath)) nodePath = "node"; // PATH依存
+                if (string.IsNullOrEmpty(scriptPath))
+                {
+                    // デフォルト: AppData/npm/...
+                    scriptPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
+                                               @"npm\node_modules\@google\gemini-cli\dist\index.js");
+                }
+
+                if (!File.Exists(scriptPath))
+                {
+                     _logger?.Invoke($"❌ [Gemini] スクリプトが見つかりません: {scriptPath}");
+                     // 続行不能だが、nodePathだけで動く環境もあるかもしれないのでトライはしない
+                     return false;
+                }
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = nodePath,
+                    Arguments = $"\"{scriptPath}\" --experimental-acp",
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8,
+                    WorkingDirectory = workingDir
+                };
+                psi.EnvironmentVariables["NO_COLOR"] = "true";
+
+                _process = new Process { StartInfo = psi };
+
+                _process.OutputDataReceived += (s, e) => {
+                    if (!string.IsNullOrEmpty(e.Data)) HandleOutput(e.Data);
+                };
+                _process.ErrorDataReceived += (s, e) => {
+                    if (!string.IsNullOrEmpty(e.Data)) _logger?.Invoke($"[STDERR]: {e.Data}");
+                };
+
+                _process.Start();
+                _stdin = _process.StandardInput;
+                _process.BeginOutputReadLine();
+                _process.BeginErrorReadLine();
+
+                _logger?.Invoke("🚀 [Gemini] プロセス起動... 初期化中...");
+
+                // Initialize
+                var initParams = new {
+                    protocolVersion = 1,
+                    clientCapabilities = new {
+                        terminal = true,
+                        fs = new { readTextFile = true, writeTextFile = false } 
+                    }
+                };
+                
+                await SendRpcRequestAsync("initialize", initParams, RPC_TIMEOUT);
+                _logger?.Invoke("✅ [Gemini] Initialize 完了");
+
+                // Session Start
+                await ResetSessionAsync(workingDir);
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Invoke($"❌ [Gemini] 起動エラー: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task ResetSessionAsync(string workingDir)
+        {
+            if (!IsRunning) return;
+
+            var sessionParams = new {
+                cwd = workingDir,
+                mcpServers = new object[] { }
+            };
+            var sessionRes = await SendRpcRequestAsync("session/new", sessionParams, RPC_TIMEOUT);
+            
+            if (sessionRes.TryGetProperty("sessionId", out var sid))
+            {
+                _sessionId = sid.GetString();
+                _logger?.Invoke($"🔄 [Gemini] セッション切替完了 (ID: {_sessionId?.Substring(0, Math.Min(8, _sessionId.Length))}...)");
+            }
+        }
+
+        private async Task<GeminiAnalysisResult> AnalyzeWithSessionAsync(List<string> imagePaths, string userRules)
+        {
+            var result = new GeminiAnalysisResult { Source = "ACP" };
+            
+            // バッファと完了通知をリセット
+            _responseBuffer.Clear();
+            _currentResponseTcs = new TaskCompletionSource<string>();
+
+            // プロンプト構築
+            string imgPath = imagePaths.FirstOrDefault() ?? "";
+            string prompt = $@"
+あなたは監視エージェントです。以下のルールに基づいて画像を分析し、ユーザーがルールに違反しているか判定してください。
+ルール: {userRules}
+
+回答は必ず以下のJSON形式のみで出力してください。Markdownのコードブロックは不要です。余計な解説も不要です。
+{{
+  ""IsViolation"": true または false,
+  ""Reason"": ""判定理由（違反している場合は具体的に、していない場合は'作業中'など）""
+}}
+
+画像パス: ""{imgPath}"" 
+Note: Use the read_file tool to read the image data from the path provided.";
+
+            try
+            {
+                // 送信
+                await SendMessageAsync(prompt);
+
+                // 完了待ち (タイムアウト付き)
+                var completedTask = await Task.WhenAny(_currentResponseTcs.Task, Task.Delay(30000));
+                if (completedTask != _currentResponseTcs.Task)
+                {
+                    result.RawText = "タイムアウト: 応答が完了しませんでした。";
+                    return result;
+                }
+
+                string rawJson = _responseBuffer.ToString();
+                result.RawText = rawJson;
+
+                // JSONパース
+                result = ParseJsonResult(rawJson, result);
+
+                // 次回のためにセッションリセット（記憶消去）
+                // ※画像パスのディレクトリを作業ディレクトリとする
+                string dir = Path.GetDirectoryName(imgPath) ?? Environment.CurrentDirectory;
+                await ResetSessionAsync(dir);
+            }
+            catch (Exception ex)
+            {
+                result.RawText = $"エラー: {ex.Message}";
+                _logger?.Invoke($"解析例外: {ex.Message}");
+            }
+
+            return result;
+        }
+
+        private async Task SendMessageAsync(string message)
+        {
+            if (!IsRunning) return;
+
+            var promptParams = new {
+                sessionId = _sessionId,
+                prompt = new object[] {
+                    new { type = "text", text = message }
+                }
+            };
+            await SendRpcRequestAsync("session/prompt", promptParams, RPC_TIMEOUT);
+        }
+
+        private Task<JsonElement> SendRpcRequestAsync(string method, object parameters, int timeoutMs)
+        {
+            var tcs = new TaskCompletionSource<JsonElement>();
+            int id = _requestId++;
+            _pendingRequests[id] = tcs;
+
+            var request = new {
+                jsonrpc = "2.0",
+                method = method,
+                @params = parameters,
+                id = id
+            };
+
+            string json = JsonSerializer.Serialize(request);
+            _stdin?.WriteLine(json);
+            _stdin?.Flush();
+
+            Task.Delay(timeoutMs).ContinueWith(_ => {
+                if (_pendingRequests.ContainsKey(id)) {
+                    _pendingRequests.Remove(id);
+                    tcs.TrySetException(new TimeoutException($"RPC '{method}' timed out."));
+                }
+            });
+
+            return tcs.Task;
+        }
+
+        private void HandleOutput(string line)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(line);
+                var root = doc.RootElement;
+
+                // 1. RPCレスポンス
+                if (root.TryGetProperty("id", out var idProp) && idProp.ValueKind == JsonValueKind.Number)
+                {
+                    int id = idProp.GetInt32();
+                    if (_pendingRequests.TryGetValue(id, out var tcs))
+                    {
+                        if (root.TryGetProperty("result", out var result)) tcs.TrySetResult(result.Clone());
+                        else if (root.TryGetProperty("error", out var error)) tcs.TrySetException(new Exception($"RPC Error: {error.GetRawText()}"));
+                        _pendingRequests.Remove(id);
+                    }
+                }
+                // 2. 通知 (session/update)
+                else if (root.TryGetProperty("method", out var methodProp) && methodProp.GetString() == "session/update")
+                {
+                    if (root.TryGetProperty("params", out var p) && p.TryGetProperty("update", out var update))
+                    {
+                        if (update.TryGetProperty("sessionUpdate", out var type) && type.GetString() == "agent_message_chunk")
+                        {
+                            if (update.TryGetProperty("content", out var content) && content.TryGetProperty("text", out var text))
+                            {
+                                string chunk = text.GetString() ?? "";
+                                _logger?.Invoke($"[🤖]: {chunk}");
+                                _responseBuffer.Append(chunk);
+
+                                // 簡易的な完了判定: JSONの閉じ括弧が含まれ、かつ必須キーがある場合
+                                // ※本来は turnComplete イベント等を待つべきだが、現状のGemini CLIの挙動に合わせて簡易実装
+                                string current = _responseBuffer.ToString();
+                                if (current.Contains("}") && (current.Contains("IsViolation") || current.Contains("Reason")))
+                                {
+                                    _currentResponseTcs?.TrySetResult("Done");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private GeminiAnalysisResult ParseJsonResult(string rawText, GeminiAnalysisResult result)
+        {
+            try
+            {
+                string jsonString = rawText;
+                var match = Regex.Match(rawText, @"\{.*\}", RegexOptions.Singleline);
+                if (match.Success) jsonString = match.Value;
+
+                using var doc = JsonDocument.Parse(jsonString);
+                if (doc.RootElement.TryGetProperty("IsViolation", out var isV)) result.IsViolation = isV.GetBoolean();
+                if (doc.RootElement.TryGetProperty("Reason", out var r)) result.Reason = r.GetString() ?? "";
+            }
+            catch
+            {
+                result.IsViolation = false;
+                result.Reason = "応答の解析に失敗しました";
+            }
+            return result;
+        }
+
+        public void Dispose()
+        {
+            try { 
+                if (_process != null && !_process.HasExited) { 
+                    _process.Kill(); 
+                    _process.Dispose(); 
+                } 
+            } catch { }
+        }
+
+        // --- 既存のメソッド (CLI One-shot / API) ---
 
         public async Task<bool> CheckCliConnectionAsync()
         {

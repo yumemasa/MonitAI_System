@@ -96,7 +96,8 @@ namespace MonitAI.Agent
                 if (!Directory.Exists(_saveFolderPath)) Directory.CreateDirectory(_saveFolderPath);
                 WriteLog($"保存先: {_saveFolderPath}");
 
-                _geminiService = new GeminiService();
+                // ★修正: ログハンドラを渡して初期化
+                _geminiService = new GeminiService((msg) => WriteLog(msg));
                 _geminiService.GeminiCliCommand = _cliPath;
                 _geminiService.UseGeminiCli = !_useApi; // 設定反映
 
@@ -104,10 +105,24 @@ namespace MonitAI.Agent
                 WriteLog($"使用モデル: {_selectedModel}"); // ログ確認用
                 WriteLog($"モード: {(_useApi ? "API" : "CLI")}");
 
-                bool cliOk = await _geminiService.CheckCliConnectionAsync();
                 if (!_useApi)
                 {
-                    WriteLog(cliOk ? "✅ CLI接続OK" : "❌ CLI接続失敗 (設定を確認してください)");
+                    // 常駐プロセス起動 (ACP)
+                    WriteLog("🚀 Gemini常駐プロセスを起動しています...");
+                    bool started = await _geminiService.StartAsync(_saveFolderPath);
+                    if (started)
+                    {
+                        WriteLog("✅ 常駐プロセス起動成功。待機中。");
+                    }
+                    else
+                    {
+                        WriteLog("❌ 常駐プロセス起動失敗。npmパスなどを確認してください。");
+                        // 失敗しても従来のCLIモード(One-shot)にフォールバックされるので続行
+                    }
+                }
+                else
+                {
+                    // APIモードの場合は接続チェック不要（キーがあればOK）
                 }
 
                 _interventionService = new InterventionService();
@@ -370,6 +385,7 @@ namespace MonitAI.Agent
             WriteLog("=== Agent Stopped ===");
             _notifyIcon?.Dispose();
             _interventionService?.Dispose();
+            _geminiService?.Dispose();
             base.OnExit(e);
         }
     }
