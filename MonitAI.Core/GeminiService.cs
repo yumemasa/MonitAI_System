@@ -199,7 +199,12 @@ namespace MonitAI.Core
             _currentResponseTcs = new TaskCompletionSource<string>();
 
             // プロンプト構築
-            string imgPath = imagePaths.FirstOrDefault() ?? "";
+            var sbPaths = new StringBuilder();
+            foreach (var path in imagePaths)
+            {
+                sbPaths.AppendLine($"\"{path}\"");
+            }
+
             string prompt = $@"
 あなたは監視エージェントです。以下のルールに基づいて画像を分析し、ユーザーがルールに違反しているか判定してください。
 ルール: {userRules}
@@ -210,8 +215,10 @@ namespace MonitAI.Core
   ""Reason"": ""判定理由（違反している場合は具体的に、していない場合は'作業中'など）""
 }}
 
-画像パス: ""{imgPath}"" 
-Note: Use the read_file tool to read the image data from the path provided.";
+画像パス一覧:
+{sbPaths}
+
+Note: Use the read_file tool to read the image data from ALL paths provided above. Analyze ALL images.";
 
             try
             {
@@ -234,7 +241,8 @@ Note: Use the read_file tool to read the image data from the path provided.";
 
                 // 次回のためにセッションリセット（記憶消去）
                 // ※画像パスのディレクトリを作業ディレクトリとする
-                string dir = Path.GetDirectoryName(imgPath) ?? Environment.CurrentDirectory;
+                string firstPath = imagePaths.FirstOrDefault() ?? "";
+                string dir = Path.GetDirectoryName(firstPath) ?? Environment.CurrentDirectory;
                 await ResetSessionAsync(dir);
             }
             catch (Exception ex)
