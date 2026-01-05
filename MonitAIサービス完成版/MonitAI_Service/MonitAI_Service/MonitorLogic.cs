@@ -4,11 +4,15 @@ using System.IO;
 using System.Text.Json;
 using System.Globalization;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MonitAI_Service
 {
     public class MonitorLogic
     {
+        private CancellationTokenSource _cts;
+        private Task _monitorTask;
+
         // ==============================
         // 設定ファイル
         // ==============================
@@ -32,7 +36,55 @@ namespace MonitAI_Service
 
         public MonitorLogic()
         {
+            // Agent用のイベントソースを作成しておく（Agentは一般ユーザー権限で動くため作成できない）
+            try
+            {
+                if (!EventLog.SourceExists("MonitAI.Agent"))
+                {
+                    EventLog.CreateEventSource("MonitAI.Agent", "Application");
+                }
+            }
+            catch (Exception ex)
+            {
+                EventLog.WriteEntry("MonitAI_Service", $"Failed to create event source for Agent: {ex.Message}", EventLogEntryType.Warning);
+            }
+
             ReloadConfigIfNeeded();
+        }
+
+        // ★ ユーザー権限で Agent を起動するタスク名
+        private const string AgentTaskName = "MonitAI_Agent_Launch";
+
+        public void Start()
+        {
+            if (_monitorTask != null && !_monitorTask.IsCompleted) return;
+
+            _cts = new CancellationTokenSource();
+            _monitorTask = Task.Run(async () =>
+            {
+                while (!_cts.Token.IsCancellationRequested)
+                {
+                    CheckAndRecoverApp();
+                    try
+                    {
+                        await Task.Delay(5000, _cts.Token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        break;
+                    }
+                }
+            });
+        }
+
+        public void Stop()
+        {
+            _cts?.Cancel();
+            try
+            {
+                _monitorTask?.Wait(2000);
+            }
+            catch { }
         }
 
         /// <summary>
@@ -60,17 +112,22 @@ namespace MonitAI_Service
                     // プロセスパスが空なら何もしない（またはログ出力）
                     if (string.IsNullOrEmpty(_processPath))
                     {
-                        EventLog.WriteEntry("MonitAI_Service", "AgentPath is empty in config. Cannot restart.", EventLogEntryType.Warning);
-                        return;
+                        // フォールバック: デフォルトパスを試す
+                        string defaultPath = @"C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\bin\Release\net8.0-windows\MonitAI.Agent.exe";
+                        if (File.Exists(defaultPath))
+                        {
+                            _processPath = defaultPath;
+                        }
+                        else
+                        {
+                            EventLog.WriteEntry("MonitAI_Service", "AgentPath is empty and default path not found. Cannot restart.", EventLogEntryType.Warning);
+                            return;
+                        }
                     }
 
-                    Process.Start(_processPath);
-
-                    EventLog.WriteEntry(
-                        "MonitAI_Service",
-                        $"{_processName} was not running. Restarted.",
-                        EventLogEntryType.Warning
-                    );
+                    // ★修正: タスクスケジューラを使用してユーザーセッションで起動する
+                    // 友人のコードを参考に、schtasks を利用する方式に変更
+                    StartAgentAsUser();
                 }
             }
             catch (Exception ex)
@@ -80,6 +137,94 @@ namespace MonitAI_Service
                     $"Monitor error: {ex.Message}",
                     EventLogEntryType.Error
                 );
+            }
+        }
+
+        private void StartAgentAsUser()
+        {
+            EnsureAgentTaskExists();
+
+            try
+            {
+                // タスクを実行
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "schtasks.exe",
+                    Arguments = $"/run /tn \"{AgentTaskName}\"",
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+
+                Process.Start(psi);
+                
+                EventLog.WriteEntry(
+                    "MonitAI_Service",
+                    $"{_processName} was not running. Triggered scheduled task '{AgentTaskName}' to restart.",
+                    EventLogEntryType.Information
+                );
+            }
+            catch (Exception ex)
+            {
+                EventLog.WriteEntry("MonitAI_Service", $"Failed to run scheduled task: {ex.Message}", EventLogEntryType.Error);
+            }
+        }
+
+        private void EnsureAgentTaskExists()
+        {
+            try
+            {
+                // タスクが存在するか確認
+                var check = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "schtasks.exe",
+                    Arguments = $"/query /tn \"{AgentTaskName}\"",
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                });
+
+                check.WaitForExit();
+                if (check.ExitCode == 0)
+                    return; // 既に存在する
+            }
+            catch { }
+
+            try
+            {
+                // タスクを作成
+                // サービス(SYSTEM)からユーザー(it222104)のタスクを作成する
+                // ※パスワードなしで作成できるかはポリシー依存だが、友人の環境で動作した実績に基づき採用
+                
+                string currentUser = "it222104"; // サービス実行時は SYSTEM になるため、対象ユーザーを明示
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "schtasks.exe",
+                    Arguments =
+                        $"/create /tn \"{AgentTaskName}\" " +
+                        $"/tr \"\\\"{_processPath}\\\"\" " +
+                        "/sc onlogon " +
+                        $"/ru \"{currentUser}\" " +
+                        "/rl limited " +
+                        "/f",
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+
+                var proc = Process.Start(psi);
+                proc.WaitForExit();
+                
+                if (proc.ExitCode == 0)
+                {
+                    EventLog.WriteEntry("MonitAI_Service", $"Created scheduled task '{AgentTaskName}' for user '{currentUser}'.", EventLogEntryType.Information);
+                }
+                else
+                {
+                    EventLog.WriteEntry("MonitAI_Service", $"Failed to create scheduled task. ExitCode: {proc.ExitCode}", EventLogEntryType.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                EventLog.WriteEntry("MonitAI_Service", $"Exception creating task: {ex.Message}", EventLogEntryType.Error);
             }
         }
 

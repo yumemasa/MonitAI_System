@@ -92,6 +92,8 @@ namespace MonitAI.UI.Features.MonitoringOverlay
         }
 
 
+        private bool _isWaitingForAgent = false;
+
         /// <summary>
         /// セッションを初期化します。
         /// </summary>
@@ -109,6 +111,11 @@ namespace MonitAI.UI.Features.MonitoringOverlay
 
             UpdateGoalDisplay();
             UpdatePenaltyDisplay();
+
+            // Agentの準備完了を待つ
+            _isWaitingForAgent = true;
+            if (TimeDisplay != null) TimeDisplay.Text = "AI接続中...";
+            
             StartTimer();
         }
 
@@ -394,12 +401,47 @@ namespace MonitAI.UI.Features.MonitoringOverlay
 
         private void Timer_Tick(object? sender, EventArgs e)
         {
+            // Agent待機中の処理
+            if (_isWaitingForAgent)
+            {
+                CheckAgentReadyStatus();
+                return; // 準備ができるまでメインタイマー（残り時間）は減らさない
+            }
+
             UpdateTimerState();
 
             if (_currentSession != null)
             {
                 SaveSession(_currentSession);
             }
+        }
+
+        private void CheckAgentReadyStatus()
+        {
+            try
+            {
+                string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "screenShot2");
+                string readyPath = Path.Combine(appData, "agent_ready.json");
+
+                if (File.Exists(readyPath))
+                {
+                    string json = File.ReadAllText(readyPath);
+                    using var doc = JsonDocument.Parse(json);
+                    if (doc.RootElement.TryGetProperty("IsReady", out var readyProp) && readyProp.GetBoolean())
+                    {
+                        // 準備完了！
+                        _isWaitingForAgent = false;
+                        
+                        // 待機していた時間分だけ終了時刻を後ろにずらす（もしEndTimeを使っている場合）
+                        // 現在のロジックは RemainingSeconds を減らす方式なので、
+                        // ここで何もしなければ「減り始める」だけなのでOK。
+                        
+                        // タイマー表示を即座に更新
+                        UpdateTimerState();
+                    }
+                }
+            }
+            catch { }
         }
 
         private void UpdateTimerState()

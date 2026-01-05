@@ -1,112 +1,42 @@
 ﻿using System;
 using System.Diagnostics;
 using System.ServiceProcess;
-using System.Threading;
 
 namespace MonitAI_Service
 {
     public class Worker : ServiceBase
     {
-        private Thread workerThread;
-        private bool stopping = false;
-
-        // 監視ロジック
         private MonitorLogic monitorLogic;
-
-        // 直前の監視状態（無駄な Start/Stop 防止）
-        private bool wasMonitoringTime = false;
 
         protected override void OnStart(string[] args)
         {
-            ConfigureAutoRestart();
-
-            // 既存ロジック（そのまま）
-            Launcher.EnsureRunning();
-            WindowsTimerRegistrar.EnsureRegistered();
-
-            EventLog.WriteEntry(
-                "MonitAI_Service",
-                "Service Started",
-                EventLogEntryType.Information
-            );
-
-            monitorLogic = new MonitorLogic();
-
-            workerThread = new Thread(ServiceLoop)
+            try
             {
-                IsBackground = true
-            };
-            workerThread.Start();
-        }
+                ConfigureAutoRestart();
 
-        private void ServiceLoop()
-        {
-            while (!stopping)
+                Launcher.EnsureRunning();
+                WindowsTimerRegistrar.EnsureRegistered();
+
+                EventLog.WriteEntry(
+                    "MonitAI_Service",
+                    "Service Started (Friend's Logic)",
+                    EventLogEntryType.Information
+                );
+
+                monitorLogic = new MonitorLogic();
+                monitorLogic.Start();   // ★ ここで必ず監視開始
+            }
+            catch (Exception ex)
             {
-                try
-                {
-                    bool isMonitoringTime = monitorLogic.IsMonitoringTime();
-
-                    // ===== 監視時間に入った瞬間 =====
-                    if (isMonitoringTime && !wasMonitoringTime)
-                    {
-                        EventLog.WriteEntry(
-                            "MonitAI_Service",
-                            "Monitoring time entered. App monitoring ON / WindowsTimer START",
-                            EventLogEntryType.Information
-                        );
-
-                        WindowsTimerController.StartTimer();
-                    }
-
-                    // ===== 監視時間を抜けた瞬間 =====
-                    if (!isMonitoringTime && wasMonitoringTime)
-                    {
-                        EventLog.WriteEntry(
-                            "MonitAI_Service",
-                            "Monitoring time exited. App monitoring OFF / WindowsTimer STOP",
-                            EventLogEntryType.Information
-                        );
-
-                        WindowsTimerController.StopTimer();
-                    }
-
-                    // ===== 監視時間内だけアプリ監視 =====
-                    if (isMonitoringTime)
-                    {
-                        monitorLogic.CheckAndRecoverApp();
-                    }
-
-                    wasMonitoringTime = isMonitoringTime;
-                }
-                catch (Exception ex)
-                {
-                    EventLog.WriteEntry(
-                        "MonitAI_Service",
-                        $"Service loop error: {ex.Message}",
-                        EventLogEntryType.Error
-                    );
-                }
-
-                Thread.Sleep(3000);
+                EventLog.WriteEntry("MonitAI_Service", $"OnStart Error: {ex.Message}", EventLogEntryType.Error);
+                throw;
             }
         }
 
         protected override void OnStop()
         {
-            // 念のため停止時は必ず止める
-            WindowsTimerController.StopTimer();
-
-            EventLog.WriteEntry(
-                "MonitAI_Service",
-                "Service stopping",
-                EventLogEntryType.Warning
-            );
-
-            stopping = true;
-            workerThread?.Join();
-
-            // 既存挙動維持
+            monitorLogic?.Stop();
+            // Environment.Exit(1); // 友人のコードにはあるが、正常終了時は不要な場合も。一旦コメントアウトせずそのまま使うなら残す
             Environment.Exit(1);
         }
 
@@ -126,9 +56,7 @@ namespace MonitAI_Service
 
                 Process.Start(psi);
             }
-            catch
-            {
-                // 無視（元の設計どおり）
+            catch {
             }
         }
     }

@@ -13,6 +13,17 @@ namespace MonitAI.Agent
 {
     public partial class App : System.Windows.Application
     {
+        public App()
+        {
+            // コンストラクタの最初でログを出力して、プロセス起動確認を行う
+            try
+            {
+                string tempLog = Path.Combine(Path.GetTempPath(), "monitai_startup.log");
+                File.AppendAllText(tempLog, $"[{DateTime.Now}] App Constructor Called. User: {Environment.UserName}\n");
+            }
+            catch { }
+        }
+
         private ScreenshotService? _screenshotService;
         private GeminiService? _geminiService;
         private InterventionService? _interventionService;
@@ -39,32 +50,84 @@ namespace MonitAI.Agent
             "screenShot2",
             "agent_log.txt");
 
+        private void WriteTempLog(string msg)
+        {
+            try
+            {
+                string tempLog = Path.Combine(Path.GetTempPath(), "monitai_startup.log");
+                File.AppendAllText(tempLog, $"[{DateTime.Now}] {msg}\n");
+            }
+            catch { }
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
+            WriteTempLog("OnStartup Begin");
+            WriteTempLog($"AppData Path: {Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}");
 
-            WriteLog("=== Agent Started ===");
-
-            LoadSettings(); // ここでモデル設定なども読み込む
-            InitializeServices();
-            SetupTrayIcon();
-
-            // APIモードの場合はAPIキー必須、CLIモードの場合はAPIキー不要（環境変数やgcloud認証を利用想定）
-            bool isConfigValid = !string.IsNullOrWhiteSpace(_rules);
-            if (_useApi)
+            // グローバル例外ハンドラの設定
+            AppDomain.CurrentDomain.UnhandledException += (s, args) =>
             {
-                isConfigValid = isConfigValid && !string.IsNullOrWhiteSpace(_apiKey);
-            }
-
-            if (isConfigValid)
-            {
-                StartMonitoring();
-            }
-            else
-            {
-                string msg = _useApi ? "設定不足: APIキーまたはルールがありません" : "設定不足: ルールが設定されていません";
+                string msg = $"🔥 Unhandled Exception: {args.ExceptionObject}";
+                if (args.ExceptionObject is Exception ex)
+                {
+                    msg += $"\nStack Trace: {ex.StackTrace}";
+                }
                 WriteLog(msg);
-                ShowNotification("設定不足", msg);
+                WriteTempLog(msg); // Tempログにも書く
+                WriteToEventLog(msg, EventLogEntryType.Error);
+            };
+
+            Current.DispatcherUnhandledException += (s, args) =>
+            {
+                string msg = $"🔥 Dispatcher Exception: {args.Exception.Message}\nStack Trace: {args.Exception.StackTrace}";
+                WriteLog(msg);
+                WriteTempLog(msg); // Tempログにも書く
+                WriteToEventLog(msg, EventLogEntryType.Error);
+                args.Handled = true; // クラッシュ防止を試みる
+            };
+
+            try
+            {
+                WriteTempLog("Calling base.OnStartup");
+                base.OnStartup(e);
+                WriteTempLog("base.OnStartup Finished");
+
+                WriteLog("=== Agent Started ===");
+                WriteTempLog("Log Initialized");
+
+                LoadSettings(); 
+                WriteTempLog("Settings Loaded");
+
+                InitializeServices();
+                WriteTempLog("Services Initialized");
+
+                SetupTrayIcon();
+                WriteTempLog("Tray Icon Setup");
+
+                // APIモードの場合はAPIキー必須、CLIモードの場合はAPIキー不要（環境変数やgcloud認証を利用想定）
+                bool isConfigValid = !string.IsNullOrWhiteSpace(_rules);
+                if (_useApi)
+                {
+                    isConfigValid = isConfigValid && !string.IsNullOrWhiteSpace(_apiKey);
+                }
+
+                if (isConfigValid)
+                {
+                    StartMonitoring();
+                    WriteTempLog("Monitoring Started");
+                }
+                else
+                {
+                    string msg = _useApi ? "設定不足: APIキーまたはルールがありません" : "設定不足: ルールが設定されていません";
+                    WriteLog(msg);
+                    ShowNotification("設定不足", msg);
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteTempLog($"🔥 Exception in OnStartup: {ex}");
+                WriteToEventLog($"Exception in OnStartup: {ex}", EventLogEntryType.Error);
             }
         }
 
@@ -82,10 +145,34 @@ namespace MonitAI.Agent
             catch { }
         }
 
+        private void WriteToEventLog(string message, EventLogEntryType type)
+        {
+            try
+            {
+                // ソースが存在しない場合は書き込めない（一般ユーザー権限では作成不可のため）
+                // サービス側で "MonitAI.Agent" ソースを作成しておくことを推奨
+                if (EventLog.SourceExists("MonitAI.Agent"))
+                {
+                    EventLog.WriteEntry("MonitAI.Agent", message, type);
+                }
+                else
+                {
+                    // ソースがない場合は Application ログに .NET Runtime として出るのを期待するか、
+                    // 既存のソースを借用する（非推奨だがデバッグ用）
+                    // EventLog.WriteEntry("Application", "MonitAI.Agent: " + message, type);
+                }
+            }
+            catch { }
+        }
+
         private async void InitializeServices()
         {
             try
-            {                SetupCommandWatcher();
+            {
+                // 初期化開始時は「準備中」とする
+                UpdateReadyStatus(false);
+
+                SetupCommandWatcher();
                 _screenshotService = new ScreenshotService();
 
                 // モニター情報をログ出力 (移植漏れの補完)
@@ -125,6 +212,9 @@ namespace MonitAI.Agent
                     // APIモードの場合は接続チェック不要（キーがあればOK）
                 }
 
+                // 初期化完了（準備OK）
+                UpdateReadyStatus(true);
+
                 _interventionService = new InterventionService();
                 _interventionService.OnLog += msg => WriteLog($"[介入] {msg}");
                 _interventionService.OnNotification += (msg, title) => ShowNotification(title, msg);
@@ -133,6 +223,20 @@ namespace MonitAI.Agent
             {
                 WriteLog($"初期化エラー: {ex.Message}");
             }
+        }
+
+        private void UpdateReadyStatus(bool isReady)
+        {
+            try
+            {
+                string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "screenShot2");
+                if (!Directory.Exists(appData)) Directory.CreateDirectory(appData);
+                string path = Path.Combine(appData, "agent_ready.json");
+                
+                var data = new { IsReady = isReady, Timestamp = DateTime.Now };
+                File.WriteAllText(path, JsonSerializer.Serialize(data));
+            }
+            catch { }
         }
 
         private FileSystemWatcher? _commandWatcher;
