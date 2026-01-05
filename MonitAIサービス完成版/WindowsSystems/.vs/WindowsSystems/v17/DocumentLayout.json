@@ -1,13 +1,13 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\it222187\\source\\repos\\WindowsSystems\\",
+  "WorkspaceRootPath": "C:\\Users\\it222187\\Downloads\\MonitAI_System\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\WindowsSystems\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CDB05E10-6C6D-440D-9067-957BEFBD9B98}|WindowsSystems\\WindowsSystems.csproj|c:\\users\\it222187\\source\\repos\\windowssystems\\windowssystems\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CDB05E10-6C6D-440D-9067-957BEFBD9B98}|WindowsSystems\\WindowsSystems.csproj|c:\\users\\it222187\\downloads\\monitai_system\\monitai_system\\monitai\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\windowssystems\\windowssystems\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CDB05E10-6C6D-440D-9067-957BEFBD9B98}|WindowsSystems\\WindowsSystems.csproj|solutionrelative:windowssystems\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CDB05E10-6C6D-440D-9067-957BEFBD9B98}|WindowsSystems\\WindowsSystems.csproj|c:\\users\\it222187\\source\\repos\\windowssystems\\windowssystems\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CDB05E10-6C6D-440D-9067-957BEFBD9B98}|WindowsSystems\\WindowsSystems.csproj|c:\\users\\it222187\\downloads\\monitai_system\\monitai_system\\monitai\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\windowssystems\\windowssystems\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CDB05E10-6C6D-440D-9067-957BEFBD9B98}|WindowsSystems\\WindowsSystems.csproj|solutionrelative:windowssystems\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -36,9 +36,9 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Worker.cs",
-              "DocumentMoniker": "C:\\Users\\it222187\\source\\repos\\WindowsSystems\\WindowsSystems\\Worker.cs",
+              "DocumentMoniker": "C:\\Users\\it222187\\Downloads\\MonitAI_System\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\WindowsSystems\\WindowsSystems\\Worker.cs",
               "RelativeDocumentMoniker": "WindowsSystems\\Worker.cs",
-              "ToolTip": "C:\\Users\\it222187\\source\\repos\\WindowsSystems\\WindowsSystems\\Worker.cs",
+              "ToolTip": "C:\\Users\\it222187\\Downloads\\MonitAI_System\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\WindowsSystems\\WindowsSystems\\Worker.cs",
               "RelativeToolTip": "WindowsSystems\\Worker.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -49,14 +49,13 @@
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\it222187\\source\\repos\\WindowsSystems\\WindowsSystems\\Program.cs",
+              "DocumentMoniker": "C:\\Users\\it222187\\Downloads\\MonitAI_System\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\WindowsSystems\\WindowsSystems\\Program.cs",
               "RelativeDocumentMoniker": "WindowsSystems\\Program.cs",
-              "ToolTip": "C:\\Users\\it222187\\source\\repos\\WindowsSystems\\WindowsSystems\\Program.cs",
+              "ToolTip": "C:\\Users\\it222187\\Downloads\\MonitAI_System\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\WindowsSystems\\WindowsSystems\\Program.cs",
               "RelativeToolTip": "WindowsSystems\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-16T00:51:04.053Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-16T00:51:04.053Z"
             }
           ]
         }

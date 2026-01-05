@@ -1,25 +1,25 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\",
+  "WorkspaceRootPath": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\MonitAI_Service\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|c:\\users\\it222187\\source\\repos\\monitai_service\\monitai_service\\monitorlogic.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|c:\\users\\it222104\\source\\repos\\monitai_system\\monitai\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\monitai_service\\monitai_service\\monitorlogic.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|solutionrelative:monitai_service\\monitorlogic.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|c:\\users\\it222187\\source\\repos\\monitai_service\\monitai_service\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|solutionrelative:monitai_service\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|c:\\users\\it222187\\source\\repos\\monitai_service\\monitai_service\\windowstimercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|solutionrelative:monitai_service\\windowstimercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|c:\\users\\it222187\\source\\repos\\monitai_service\\monitai_service\\launcher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|c:\\users\\it222104\\source\\repos\\monitai_system\\monitai\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\monitai_service\\monitai_service\\launcher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|solutionrelative:monitai_service\\launcher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|c:\\users\\it222187\\source\\repos\\monitai_service\\monitai_service\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|c:\\users\\it222104\\source\\repos\\monitai_system\\monitai\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\monitai_service\\monitai_service\\windowstimercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|solutionrelative:monitai_service\\windowstimercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|c:\\users\\it222104\\source\\repos\\monitai_system\\monitai\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\monitai_service\\monitai_service\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|solutionrelative:monitai_service\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|c:\\users\\it222104\\source\\repos\\monitai_system\\monitai\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\monitai_service\\monitai_service\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{447144B0-C48A-48FA-8679-3909F7AE7C15}|MonitAI_Service\\MonitAI_Service.csproj|solutionrelative:monitai_service\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -30,55 +30,77 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 11,
           "Children": [
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{74946827-37a0-11d2-a273-00c04f8ef4ff}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:3:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
             },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "WindowsTimerController.cs",
-              "DocumentMoniker": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\WindowsTimerController.cs",
-              "RelativeDocumentMoniker": "MonitAI_Service\\WindowsTimerController.cs",
-              "ToolTip": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\WindowsTimerController.cs",
-              "RelativeToolTip": "MonitAI_Service\\WindowsTimerController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACMAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-17T02:05:21.292Z",
-              "EditorCaption": ""
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Launcher.cs",
-              "DocumentMoniker": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\Launcher.cs",
-              "RelativeDocumentMoniker": "MonitAI_Service\\Launcher.cs",
-              "ToolTip": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\Launcher.cs",
-              "RelativeToolTip": "MonitAI_Service\\Launcher.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAADwv0AAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "WindowsTimerController.cs",
+              "DocumentMoniker": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\MonitAI_Service\\MonitAI_Service\\WindowsTimerController.cs",
+              "RelativeDocumentMoniker": "MonitAI_Service\\WindowsTimerController.cs",
+              "ToolTip": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\MonitAI_Service\\MonitAI_Service\\WindowsTimerController.cs",
+              "RelativeToolTip": "MonitAI_Service\\WindowsTimerController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACMAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-16T01:35:29.326Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-17T02:05:21.292Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Launcher.cs",
+              "DocumentMoniker": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\MonitAI_Service\\MonitAI_Service\\Launcher.cs",
+              "RelativeDocumentMoniker": "MonitAI_Service\\Launcher.cs",
+              "ToolTip": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\MonitAI_Service\\MonitAI_Service\\Launcher.cs",
+              "RelativeToolTip": "MonitAI_Service\\Launcher.cs",
+              "ViewState": "AgIAACgAAAAAAAAAAAAAwEAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-16T01:35:29.326Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "MonitorLogic.cs",
-              "DocumentMoniker": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitorLogic.cs",
+              "DocumentMoniker": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\MonitAI_Service\\MonitAI_Service\\MonitorLogic.cs",
               "RelativeDocumentMoniker": "MonitAI_Service\\MonitorLogic.cs",
-              "ToolTip": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\MonitorLogic.cs*",
-              "RelativeToolTip": "MonitAI_Service\\MonitorLogic.cs*",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAABSAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\MonitAI_Service\\MonitAI_Service\\MonitorLogic.cs",
+              "RelativeToolTip": "MonitAI_Service\\MonitorLogic.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAANAAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-08T05:03:58.299Z",
               "EditorCaption": ""
@@ -87,27 +109,25 @@
               "$type": "Document",
               "DocumentIndex": 4,
               "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\Program.cs",
+              "DocumentMoniker": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\MonitAI_Service\\MonitAI_Service\\Program.cs",
               "RelativeDocumentMoniker": "MonitAI_Service\\Program.cs",
-              "ToolTip": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\Program.cs",
+              "ToolTip": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\MonitAI_Service\\MonitAI_Service\\Program.cs",
               "RelativeToolTip": "MonitAI_Service\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-20T06:48:35.271Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-20T06:48:35.271Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "Worker.cs",
-              "DocumentMoniker": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\Worker.cs",
+              "DocumentMoniker": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\MonitAI_Service\\MonitAI_Service\\Worker.cs",
               "RelativeDocumentMoniker": "MonitAI_Service\\Worker.cs",
-              "ToolTip": "C:\\Users\\it222187\\source\\repos\\MonitAI_Service\\MonitAI_Service\\Worker.cs",
+              "ToolTip": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI\u30B5\u30FC\u30D3\u30B9\u5B8C\u6210\u7248\\MonitAI_Service\\MonitAI_Service\\Worker.cs",
               "RelativeToolTip": "MonitAI_Service\\Worker.cs",
               "ViewState": "AgIAACUAAAAAAAAAAAAiwCcAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-20T06:48:20.43Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-20T06:48:20.43Z"
             }
           ]
         }

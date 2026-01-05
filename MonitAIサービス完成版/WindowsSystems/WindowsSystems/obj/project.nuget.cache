@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "TtRG6jpsMno=",
+  "dgSpecHash": "NIHyXaSkS24=",
   "success": true,
-  "projectFilePath": "C:\\Users\\it222187\\source\\repos\\WindowsSystems\\WindowsSystems\\WindowsSystems.csproj",
+  "projectFilePath": "C:\\Users\\it222187\\Downloads\\MonitAI_System\\MonitAI_System\\MonitAIサービス完成版\\WindowsSystems\\WindowsSystems\\WindowsSystems.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.configuration\\8.0.0\\microsoft.extensions.configuration.8.0.0.nupkg.sha512",
     "C:\\Users\\it222187\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\8.0.0\\microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",

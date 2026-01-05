@@ -1,6 +1,8 @@
 初めて起動するとき
 ①サービスに登録する
-sc.exe create MonitAI_Service binPath= "C:\パス\MonitAI_Service.exe"
+sc.exe create MonitAI_Service binPath="C:\Users\it222104\source\repos\MonitAI_System\MonitAIサービス完成版\MonitAI_Service\MonitAI_Service\bin\Release\net8.0\MonitAI_Service.exe"
+
+
 ②サービスを起動させる
 Start-Service -Name MonitAI_Service
 ③再起動や停止無効を機能させる
