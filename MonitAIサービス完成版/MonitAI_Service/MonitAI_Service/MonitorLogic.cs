@@ -16,9 +16,17 @@ namespace MonitAI_Service
         // ==============================
         // 設定ファイル
         // ==============================
-        // ユーザーのAppDataにある config.json を参照する
-        // ※注意: サービスは「ユーザーアカウント」で実行する必要があります (LocalSystemでは参照不可)
-        private readonly string _configPath = @"C:\Users\it222104\AppData\Roaming\screenShot2\config.json";
+        // 動的に取得するため、readonlyフィールドではなくプロパティまたはメソッドで解決する
+        private string GetConfigPath()
+        {
+            string userName = GetActiveConsoleUserName();
+            if (string.IsNullOrEmpty(userName)) return string.Empty;
+
+            // 簡易的に C:\Users\<User>\AppData\Roaming\... を構築
+            // ※本来はレジストリ(ProfileList)などを参照すべきだが、一般的な構成を想定
+            return $@"C:\Users\{userName}\AppData\Roaming\screenShot2\config.json";
+        }
+        
         private DateTime _lastConfigWriteTime = DateTime.MinValue;
 
         // ==============================
@@ -117,15 +125,18 @@ namespace MonitAI_Service
                     // プロセスパスが空なら何もしない（またはログ出力）
                     if (string.IsNullOrEmpty(_processPath))
                     {
-                        // フォールバック: デフォルトパスを試す
-                        string defaultPath = @"C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\bin\Release\net8.0-windows\MonitAI.Agent.exe";
-                        if (File.Exists(defaultPath))
+                        // フォールバック: Configにパスがない場合、Serviceと同じ場所などを探す
+                        // (ソースコードのハードコーディングは削除)
+                        string serviceDir = AppDomain.CurrentDomain.BaseDirectory;
+                        string sameDirCandidate = Path.Combine(serviceDir, "MonitAI.Agent.exe");
+                        
+                        if (File.Exists(sameDirCandidate))
                         {
-                            _processPath = defaultPath;
+                            _processPath = sameDirCandidate;
                         }
                         else
                         {
-                            EventLog.WriteEntry("MonitAI_Service", "AgentPath is empty and default path not found. Cannot restart.", EventLogEntryType.Warning);
+                            EventLog.WriteEntry("MonitAI_Service", $"AgentPath is not set in config and not found in service directory.", EventLogEntryType.Warning);
                             return;
                         }
                     }
@@ -196,10 +207,14 @@ namespace MonitAI_Service
             try
             {
                 // タスクを作成
-                // サービス(SYSTEM)からユーザー(it222104)のタスクを作成する
-                // ※パスワードなしで作成できるかはポリシー依存だが、友人の環境で動作した実績に基づき採用
+                // サービス(SYSTEM)からユーザーのタスクを作成する
                 
-                string currentUser = "it222104"; // サービス実行時は SYSTEM になるため、対象ユーザーを明示
+                string currentUser = GetActiveConsoleUserName(); // 動的に取得
+                if (string.IsNullOrEmpty(currentUser))
+                {
+                    EventLog.WriteEntry("MonitAI_Service", "Cannot determine active user for task creation.", EventLogEntryType.Error);
+                    return;
+                }
 
                 var psi = new ProcessStartInfo
                 {
@@ -300,33 +315,34 @@ namespace MonitAI_Service
         // ==============================
         private void ReloadConfigIfNeeded()
         {
-            if (!File.Exists(_configPath))
+            string configPath = GetConfigPath();
+            if (string.IsNullOrEmpty(configPath) || !File.Exists(configPath))
             {
                 // ファイルがない場合、1回だけログを出す（スパム防止）
                 if (_lastConfigWriteTime != DateTime.MinValue) return;
                 
                 EventLog.WriteEntry(
                     "MonitAI_Service",
-                    $"Config file not found at: {_configPath}",
+                    $"Config file not found or user not detected. Path: {configPath}",
                     EventLogEntryType.Warning
                 );
                 _lastConfigWriteTime = DateTime.MinValue.AddSeconds(1); // ログ出力済みフラグ代わり
                 return;
             }
 
-            DateTime writeTime = File.GetLastWriteTimeUtc(_configPath);
+            DateTime writeTime = File.GetLastWriteTimeUtc(configPath);
             if (writeTime <= _lastConfigWriteTime)
                 return;
 
             _lastConfigWriteTime = writeTime;
-            LoadConfig();
+            LoadConfig(configPath);
         }
 
-        private void LoadConfig()
+        private void LoadConfig(string path)
         {
             try
             {
-                string json = File.ReadAllText(_configPath);
+                string json = File.ReadAllText(path);
                 using var doc = JsonDocument.Parse(json);
                 var root = doc.RootElement;
 
@@ -375,6 +391,82 @@ namespace MonitAI_Service
                     EventLogEntryType.Error
                 );
             }
+        }
+
+        // =============================================================
+        // Helper: Active Console User Logic
+        // =============================================================
+        // WTS (Windows Terminal Services) APIを使って
+        // 現在物理コンソール(ID:1など)を使っているユーザー名を特定する
+        
+        [System.Runtime.InteropServices.DllImport("wtsapi32.dll", SetLastError = true)]
+        private static extern bool WTSQuerySessionInformation(
+            IntPtr hServer, 
+            int sessionId, 
+            WTS_INFO_CLASS wtsInfoClass, 
+            out IntPtr ppBuffer, 
+            out int pBytesReturned);
+
+        [System.Runtime.InteropServices.DllImport("wtsapi32.dll")]
+        private static extern void WTSFreeMemory(IntPtr pMemory);
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        private static extern int WTSGetActiveConsoleSessionId();
+
+        private enum WTS_INFO_CLASS
+        {
+            WTSInitialProgram,
+            WTSApplicationName,
+            WTSWorkingDirectory,
+            WTSOEMId,
+            WTSSessionId,
+            WTSUserName,
+            WTSWinStationName,
+            WTSDomainName,
+            WTSConnectState,
+            WTSClientBuildNumber,
+            WTSClientName,
+            WTSClientDirectory,
+            WTSClientProductId,
+            WTSClientHardwareId,
+            WTSClientAddress,
+            WTSClientDisplay,
+            WTSClientProtocolType,
+            WTSIdleTime,
+            WTSLogonTime,
+            WTSIncomingBytes,
+            WTSOutgoingBytes,
+            WTSIncomingFrames,
+            WTSOutgoingFrames,
+            WTSClientInfo,
+            WTSSessionInfo
+        }
+
+        private string GetActiveConsoleUserName()
+        {
+            try
+            {
+                // アクティブなセッションIDを取得
+                int sessionId = WTSGetActiveConsoleSessionId();
+                if (sessionId == -1) return null; // セッションなし
+
+                IntPtr buffer;
+                int strLen;
+                
+                // ユーザー名取得
+                if (WTSQuerySessionInformation(IntPtr.Zero, sessionId, WTS_INFO_CLASS.WTSUserName, out buffer, out strLen) && strLen > 1)
+                {
+                    string userName = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(buffer);
+                    WTSFreeMemory(buffer);
+                    return userName;
+                }
+            }
+            catch (Exception ex)
+            {
+                // エラーログはくどくなるので最低限に
+                // EventLog.WriteEntry("MonitAI_Service", $"User detection failed: {ex.Message}", EventLogEntryType.Warning);
+            }
+            return null; // 特定失敗
         }
     }
 }

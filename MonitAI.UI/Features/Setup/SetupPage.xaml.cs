@@ -816,6 +816,13 @@ namespace MonitAI.UI.Features.Setup
             DateTime endTime = startTime.AddMinutes(durationMinutes);
             settings["EndTime"] = endTime.ToString("o"); // ISO 8601
 
+            // Agentのパスを記録 (Serviceから参照するため)
+            string? agentPath = GetAgentPath();
+            if (!string.IsNullOrEmpty(agentPath))
+            {
+                settings["AgentPath"] = agentPath;
+            }
+
             // 常に正しいパスで上書き（現状仕様）
             string appDataRoaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             settings["CliPath"] = Path.Combine(appDataRoaming, @"npm\gemini.cmd");
@@ -865,6 +872,13 @@ namespace MonitAI.UI.Features.Setup
 
         private string? GetAgentPath()
         {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            
+            // 1. 同一フォルダ (リリース配置時など、exeが同じ場所にある場合)
+            string sameDirObj = Path.Combine(baseDir, "MonitAI.Agent.exe");
+            if (File.Exists(sameDirObj)) return sameDirObj;
+
+            // 2. 開発環境 (ソリューション構成)
             string? solutionRoot = GetSolutionRoot();
             if (string.IsNullOrEmpty(solutionRoot)) return null;
 
@@ -872,8 +886,17 @@ namespace MonitAI.UI.Features.Setup
 #if DEBUG
             configName = "Debug";
 #endif
-            string frameworkName = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).Name;
-            return Path.Combine(solutionRoot, "MonitAI.Agent", "bin", configName, frameworkName, "MonitAI.Agent.exe");
+            string frameworkName = new DirectoryInfo(baseDir).Name;
+            
+            // まずは現在の構成(Debug/Release)で探す
+            string path = Path.Combine(solutionRoot, "MonitAI.Agent", "bin", configName, frameworkName, "MonitAI.Agent.exe");
+            if (File.Exists(path)) return path;
+
+            // 見つからなければ Debug ビルドを探す (フォールバック)
+            string debugPath = Path.Combine(solutionRoot, "MonitAI.Agent", "bin", "Debug", frameworkName, "MonitAI.Agent.exe");
+            if (File.Exists(debugPath)) return debugPath;
+
+            return null;
         }
 
         #endregion
