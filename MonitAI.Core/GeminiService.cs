@@ -34,7 +34,7 @@ namespace MonitAI.Core
         private int _requestId = 1;
         private readonly Dictionary<int, TaskCompletionSource<JsonElement>> _pendingRequests = new();
         private string? _sessionId;
-        private const int RPC_TIMEOUT = 120000; // 120秒
+        private const int RPC_TIMEOUT = 1200000; // 120秒
         private StringBuilder _responseBuffer = new StringBuilder();
         
         // 応答待ち用

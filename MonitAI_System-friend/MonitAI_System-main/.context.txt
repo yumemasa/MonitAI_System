@@ -1,0 +1,123 @@
+
+MonitAI_System UI開発担当 引継ぎコンテキスト
+====================================
+
+概要:
+- プロジェクト: MonitAI_System
+- 担当: `MonitAI.UI`（WPF UI 層）
+- 目的: 画面監視とGemini判定に基づく集中支援／生産性管理アプリのUI実装・保守
+
+主要責務（UI）:
+- セッション設定（目標、禁止事項、API設定など）を行う `SetupPage`
+- 設定保存／読み込みを行う `SettingsPage`
+- Agent（MonitAI.Agent.exe）を起動・管理するロジック（ファイル連携、パス検証）
+- 監視オーバーレイ（`MonitoringOverlay`）：`status.json` と `agent_log.txt` を1秒ごとに読み表示
+- ファイルベース連携を厳守（%APPDATA%\\screenShot2\\ 以下）
+
+ファイル連携仕様（必須）:
+- ベースパス: `%APPDATA%\\screenShot2\\`
+- `config.json` (UI → Agent): 設定（Rules, ApiKey, UseApi, Model, CliPath, EndTime）
+- `status.json` (Agent → UI): Agentの状態（Points, LastUpdated）
+- `agent_log.txt` (Agent → UI): 実行ログ（UIは末尾を読み取り表示）
+- `command.json` (UI → Agent): 命令（例: { "Command": "AddPoints", "Value": 15 }）
+
+ポイントと介入レベル:
+- 閾値は45ポイント刻みでレベルが上がる（UIとCoreで同一認識が必要）
+
+既知の注意点／問題:
+- Agent起動パスは環境依存で失敗しやすい → `AppDomain.CurrentDomain.BaseDirectory`等からの相対解決と検証を行うこと
+- ログ表示が空の場合はまずファイル更新有無を確認する（UI側で非同期に末尾読み取り）
+- CLIモード（`UseApi=false`）では `CliPath` が不正だとAgentが即死する → パス検証を厳格に
+
+実装ガイドライン（UI側）:
+- ファイルI/OはUIスレッドをブロックしないよう `async`/`await` と `Task` を使用する
+- `MonitoringOverlay` は1秒ポーリングで `status.json` と `agent_log.txt` を読む（非同期）
+- 設定書き込み（`config.json`）はAtomicに行う（テンポラリ→リネーム等）
+- Agent起動はUI責任だが、Agent内部の介入ロジックには手を入れない
+
+行動方針（引継ぎ時）:
+- 不足情報は勝手に補完せず必ず確認すること
+- UIで出す表示は上記ファイル仕様と矛盾させないこと
+- 変更を加える際は、まず小さく安全な修正を行い、必要ならテストを実行する
+
+参照ファイル（作業中の主なファイル）:
+- MonitAI.UI/Features/Main/MainWindow.xaml(.cs)
+- MonitAI.UI/Features/Setup/SetupPage.xaml(.cs)
+- MonitAI.UI/Features/Settings/SettingsPage.xaml(.cs)
+- MonitAI.UI/Features/MonitoringOverlay/MonitoringOverlay.xaml(.cs)
+
+この内容はUI担当エンジニア向けの常時参照コンテキストです。以後の作業指示はこの前提に従ってください。
+---
+整理版コンテキスト（要点）
+=========================
+
+1) プロジェクト概要
+- 名称: MonitAI_System
+- 担当: `MonitAI.UI` (WPF)
+- 役割: セッション設定、Agent起動管理、監視オーバーレイ表示、ファイルベース通信
+
+2) ファイル連携仕様（必須・変更厳禁）
+- ベースパス: `%APPDATA%\\screenShot2\\`
+- `config.json` (UI → Agent): Rules, ApiKey, UseApi, Model, CliPath, EndTime
+- `status.json` (Agent → UI): Points, LastUpdated
+- `agent_log.txt` (Agent → UI): 実行ログ（UIは末尾を随時読み取り表示）
+- `command.json` (UI → Agent): 命令（例: { "Command":"AddPoints","Value":15 }）
+
+3) 技術・実装注意点
+- 言語: C# (.NET, WPF)。`Wpf.Ui` を使用。
+- ファイルI/O は UI スレッドをブロックしない (`async`/`await`, Task を利用)。
+- 設定書き込みは可能ならアトミックに（テンポラリ→リネーム）。
+- Agent 起動パスは環境依存で失敗しやすい -> `AppDomain.CurrentDomain.BaseDirectory` 等による相対解決と検証を推奨。
+
+4) UI 構成（主なファイル）
+- `MonitAI.UI/Features/Main/MainWindow.xaml(.cs)` — アプリ起動・ナビ管理・ウィンドウ制御
+- `MonitAI.UI/Features/Setup/SetupPage.xaml(.cs)` — セッション作成、`config.json` 書込、Agent起動
+- `MonitAI.UI/Features/Settings/SettingsPage.xaml(.cs)` — APIキー、モデル、CLIパス等
+- `MonitAI.UI/Features/MonitoringOverlay/MonitoringOverlay.xaml(.cs)` — 監視表示、`status.json` / `agent_log.txt` ポーリング
+
+5) ポイントと介入レベル
+- 閾値: 45pt刻みで段階的にレベルアップ（UI と `MonitAI.Core` で一致させること）。
+
+6) 既知の問題と対策
+- 現象: ミニモードから通常モード復帰時にウィンドウサイズがミニのまま残る問題。
+- 対策: `MainWindow` にてウィンドウ状態を完全保存・順序立てて復元する実装を追加済み（`SaveWindowState()` / `RestoreWindow()` を拡張）。
+
+7) 最近の変更（要点）
+- `MainWindow.xaml.cs` にて、ミニモード復帰のための保存/復元ロジックを強化。
+	- 保存項目に `MinWidth/MinHeight/MaxWidth/MaxHeight/Topmost/ShowInTaskbar/ExtendsContentIntoTitleBar/Background/MainTitleBar.Visibility` を追加
+	- 復元は Dispatcher.BeginInvoke で順序を守り、Maximized の場合は一旦 Normal に切り替えてから復元
+
+8) 動作確認チェックリスト
+- (A) 任意サイズ → ミニ → 復帰: サイズ/位置が復元される
+- (B) 最大化状態 → ミニ → 復帰: 最大化が正しく復元される
+- (C) 監視中の `WndProc` ブロック挙動に影響がないか
+
+9) 次の作業候補
+- Agent 起動パスの検証強化（SetupPage でのバリデーション追加）
+- `MonitoringOverlay` の `status.json` / `agent_log.txt` 読み取りを完全非同期化（ファイルI/Oの `async` 化）
+- ユーザー設定の永続化とリカバリ手順のドキュメント化
+
+10) 連絡と引継ぎ方針
+- 不足情報は勝手に補完しないこと。仕様不明点は都度問い合わせる。
+
+---
+更新履歴:
+- 2025-12-31: ミニ→通常復元ロジックを実装・`.context.txt` を整理
+
+---
+**コミュニケーションフロー（保存）**
+以下の手順でやり取りを行い、以後の作業はこの流れに従う。
+
+1) 私（ユーザー）: 要望を伝える
+2) あなた（UI担当AI）: 要望の認識（要約）、UXイメージ、懸念点、他機能への影響有無を提示し、承認を待つ
+3) 私: 承認 または 質問
+	- 承認された場合 -> あなた: 実行して何を変えたかを記載、テスト方法を提示して確認を依頼
+	- 質問された場合 -> あなた: 追加説明を行い、再度承認を待つ
+4) 私: 感謝 または エラー報告
+	- 感謝された場合 -> あなた: やり取りを終了（必要なら次の提案を行う）
+	- エラー報告の場合 -> あなた: 原因を説明し、必要な追加情報を要求し、解決策を提示
+
+運用ルール:
+- 実装前は必ずユーザーの明示的承認を得ること。
+- 変更点は必ず該当ファイル名と差分要約で報告すること。
+- 実行後は簡潔な検証手順（3〜5ステップ）を提示してユーザーに確認してもらうこと。

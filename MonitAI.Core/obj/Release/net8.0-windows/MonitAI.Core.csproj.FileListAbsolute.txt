@@ -1,0 +1,13 @@
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\bin\Release\net8.0-windows\MonitAI.Core.deps.json
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\bin\Release\net8.0-windows\MonitAI.Core.dll
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\bin\Release\net8.0-windows\MonitAI.Core.pdb
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Release\net8.0-windows\MonitAI.Core.csproj.AssemblyReference.cache
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Release\net8.0-windows\MonitAI.Core.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Release\net8.0-windows\MonitAI.Core.AssemblyInfoInputs.cache
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Release\net8.0-windows\MonitAI.Core.AssemblyInfo.cs
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Release\net8.0-windows\MonitAI.Core.csproj.CoreCompileInputs.cache
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Release\net8.0-windows\MonitAI.Core.sourcelink.json
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Release\net8.0-windows\MonitAI.Core.dll
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Release\net8.0-windows\refint\MonitAI.Core.dll
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Release\net8.0-windows\MonitAI.Core.pdb
+c:\Users\it222104\source\repos\MonitAI_System\MonitAI.Core\obj\Release\net8.0-windows\ref\MonitAI.Core.dll

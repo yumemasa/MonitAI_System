@@ -1,9 +1,9 @@
 {
   "Monitoring": {
-    "StartDate": "2026-01-03",
-    "EndDate": "2026-01-03",
-    "StartTime": "19:06",
-    "EndTime": "19:07",
+    "StartDate": "2026-01-06",
+    "EndDate": "2026-01-06",
+    "StartTime": "09:26",
+    "EndTime": "09:31",
     "ProcessName": "MonitAI.Agent",
     "ProcessPath": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAI.Agent\\bin\\Debug\\net8.0-windows\\MonitAI.Agent.exe"
   }

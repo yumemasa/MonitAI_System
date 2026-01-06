@@ -48,11 +48,15 @@ C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\bin\Debug\net8.0-window
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\bin\Debug\net8.0-windows\MonitAI.Core.pdb
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\MonitAI.UI.csproj.AssemblyReference.cache
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\Features\Main\MainWindow.baml
+C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\Features\MonitoringOverlay\DebugLogWindow.baml
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\Features\MonitoringOverlay\MonitoringOverlay.baml
+C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\Features\MonitoringOverlay\TransparentMiniWindow.baml
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\Features\Settings\SettingsPage.baml
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\Features\Setup\SetupPage.baml
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\Features\Main\MainWindow.g.cs
+C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\Features\MonitoringOverlay\DebugLogWindow.g.cs
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\Features\MonitoringOverlay\MonitoringOverlay.g.cs
+C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\Features\MonitoringOverlay\TransparentMiniWindow.g.cs
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\Features\Settings\SettingsPage.g.cs
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\Features\Setup\SetupPage.g.cs
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.UI\obj\Debug\net8.0-windows\App.g.cs

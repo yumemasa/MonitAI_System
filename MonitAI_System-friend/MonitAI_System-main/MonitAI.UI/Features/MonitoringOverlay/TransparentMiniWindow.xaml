@@ -1,0 +1,134 @@
+<Window x:Class="MonitAI.UI.Features.MonitoringOverlay.TransparentMiniWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="MiniTimer"
+        Width="180" Height="180"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="True"
+        ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
+        MouseLeftButtonDown="OnDragMove"
+        MouseEnter="OnWindowMouseEnter"
+        MouseLeave="OnWindowMouseLeave"
+        StateChanged="OnWindowStateChanged">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="MiniTextPrimaryBrush" Color="White"/>
+        <SolidColorBrush x:Key="MiniTextTertiaryBrush" Color="#808080"/>
+        <SolidColorBrush x:Key="MiniAccentBrush" Color="#60CDFF"/>
+        <SolidColorBrush x:Key="MiniSolidBackgroundBrush" Color="#2D2D2D"/>
+        <SolidColorBrush x:Key="MiniSurfaceStrokeBrush" Color="#404040"/>
+    </Window.Resources>
+
+    <Grid x:Name="RootGrid">
+        <!-- 外枠: 透過モード時は背景を透明に -->
+        <Border x:Name="OuterBorder" 
+                Background="#E0202020" 
+                CornerRadius="12" 
+                BorderBrush="{StaticResource MiniSurfaceStrokeBrush}" 
+                BorderThickness="1">
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="ShakeTransform" />
+            </Border.RenderTransform>
+            <Grid ClipToBounds="True">
+
+                <!-- タイマーリング -->
+                <Viewbox Margin="12">
+                    <Grid Width="400" Height="400" RenderTransformOrigin="0.5,0.5">
+                        <!-- 円背景: 透過モード時は透明に -->
+                        <Grid Width="330" Height="330" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Grid.Clip>
+                                <EllipseGeometry Center="165,165" RadiusX="165" RadiusY="165"/>
+                            </Grid.Clip>
+                            <Border x:Name="InnerBackground" Background="{StaticResource MiniSolidBackgroundBrush}" />
+                            <!-- 液体エリア: 透過モード時は透明に -->
+                            <Border x:Name="LiquidWater" 
+                                    Height="330" Width="330"
+                                    VerticalAlignment="Bottom"
+                                    RenderTransformOrigin="0.5, 1">
+                                <Border.RenderTransform>
+                                    <ScaleTransform x:Name="LiquidScaleTransform" ScaleY="0" />
+                                </Border.RenderTransform>
+                            </Border>
+                        </Grid>
+
+                        <!-- 円弧（少し透過） -->
+                        <Path x:Name="ArcPath" Stroke="{StaticResource MiniAccentBrush}" StrokeThickness="20" StrokeEndLineCap="Round" Opacity="0.7">
+                            <Path.Data>
+                                <PathGeometry>
+                                    <PathFigure x:Name="ArcFigure" StartPoint="200,10">
+                                        <ArcSegment x:Name="ArcSegment" Point="200,10" 
+                                                    Size="190,190"
+                                                    IsLargeArc="False"
+                                                    SweepDirection="Clockwise" />
+                                    </PathFigure>
+                                </PathGeometry>
+                            </Path.Data>
+                        </Path>
+                    </Grid>
+                </Viewbox>
+
+                <!-- 中央テキスト（不透明を維持） -->
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False">
+                    <TextBlock x:Name="TimeDisplay" 
+                               FontSize="32" FontWeight="Bold" 
+                               Foreground="{StaticResource MiniTextPrimaryBrush}" HorizontalAlignment="Center">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.8"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+
+                    <ui:SymbolIcon x:Name="PenaltyIcon" Symbol="Alert24" 
+                                   FontSize="24" Foreground="{StaticResource MiniTextPrimaryBrush}" 
+                                   Margin="0,4,0,0">
+                        <ui:SymbolIcon.Effect>
+                            <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.8"/>
+                        </ui:SymbolIcon.Effect>
+                    </ui:SymbolIcon>
+                </StackPanel>
+
+                <!-- ボタンコンテナ（ホバー時に表示） -->
+                <Grid x:Name="ButtonContainer" Opacity="0">
+                    <!-- 左上: 通常モードへ戻るボタン -->
+                    <ui:Button Icon="{ui:SymbolIcon ArrowMaximize24}" 
+                               Click="OnRestoreClick"
+                               Appearance="Transparent" 
+                               Background="#33000000"
+                               HorizontalAlignment="Left" VerticalAlignment="Top"
+                               Margin="8" Width="32" Height="32" Padding="0"
+                               ToolTip="通常モードへ戻る"
+                               Foreground="{StaticResource MiniTextTertiaryBrush}"/>
+
+                    <!-- 右上: 最小化ボタン -->
+                    <ui:Button Click="OnMinimizeClick"
+                               Appearance="Transparent"
+                               HorizontalAlignment="Right" VerticalAlignment="Top"
+                               Margin="8" Width="32" Height="32" Padding="0"
+                               ToolTip="最小化"
+                               Foreground="{StaticResource MiniTextTertiaryBrush}">
+                        <Border Width="24" Height="24" CornerRadius="5" Background="#22000000" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="−" FontSize="14" FontWeight="Bold" Foreground="{StaticResource MiniTextTertiaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ui:Button>
+                </Grid>
+
+                <!-- 左下: 透過切替ボタン（初期は非表示、ホバー/モード切替で表示） -->
+                <ui:Button x:Name="TransparentToggleButton"
+                           Click="OnTransparentToggleClick"
+                           Appearance="Transparent"
+                           Background="#33000000"
+                           HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                           Margin="8" Width="32" Height="32" Padding="0"
+                           ToolTip="透過切替"
+                           Foreground="{StaticResource MiniTextTertiaryBrush}"
+                           Opacity="0">
+                    <ui:SymbolIcon x:Name="TransparentButtonIcon" Symbol="EyeOff24" FontSize="16" Foreground="{StaticResource MiniTextTertiaryBrush}"/>
+                </ui:Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -20,6 +20,9 @@ C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\bin\Debug\net8.0-win
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\MonitAI.Agent.csproj.AssemblyReference.cache
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\App.g.cs
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\MonitAI.Agent_MarkupCompile.cache
+C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\MonitAI.Agent_MarkupCompile.lref
+C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\App.baml
+C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\MonitAI.Agent.g.resources
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\MonitAI.Agent.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\MonitAI.Agent.AssemblyInfoInputs.cache
 C:\Users\it222104\source\repos\MonitAI_System\MonitAI.Agent\obj\Debug\net8.0-windows\MonitAI.Agent.AssemblyInfo.cs

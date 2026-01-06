@@ -1,0 +1,346 @@
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms; // Timer, Keys, SendKeys
+using NAudio.CoreAudioApi;
+
+namespace MonitAI.Core
+{
+    public class InterventionService : IDisposable
+    {
+        // 状態フラグ
+        private bool _isDelayEnabled = false;
+        private bool _isGrayscaleEnabled = false;
+        private bool _isMouseInverted = false;
+        private bool _isSendingKey = false;
+
+        // タイマーとフック
+        private System.Windows.Forms.Timer? _moveTimer;
+        private System.Windows.Forms.Timer? _mouseInversionTimer;
+        private Point _lastMousePos;
+        private IntPtr _keyboardHookID = IntPtr.Zero;
+        private NativeMethods.LowLevelKeyboardProc? _keyboardProc; // ガベージコレクション防止のため保持
+
+        // イベント（UIへの通知用）
+        public event Action<string>? OnLog;
+        public event Action<string, string>? OnNotification; // message, title
+
+        public InterventionService()
+        {
+            InitializeTimers();
+            _keyboardProc = KeyboardHookCallback;
+        }
+
+        private void InitializeTimers()
+        {
+            _moveTimer = new System.Windows.Forms.Timer { Interval = 2 };
+            _moveTimer.Tick += MoveTimer_Tick;
+
+            _mouseInversionTimer = new System.Windows.Forms.Timer { Interval = 30000 };
+            _mouseInversionTimer.Tick += MouseInversionTimer_Tick;
+        }
+
+        private int _lastLevel = 0;
+        private int _lastPoints = 0;
+
+        /// <summary>
+        /// ポイントに基づいて介入レベルを適用します。
+        /// </summary>
+        public async Task ApplyLevelAsync(int points, string goalSummary)
+        {
+            // ポイントが減少した（＝正常判定だった）場合、すべてのペナルティを解除
+            if (points < _lastPoints)
+            {
+                ResetAllInterventions();
+                OnLog?.Invoke("✅ 正常判定のため、ペナルティを解除しました。");
+                _lastPoints = points;
+                _lastLevel = 0; 
+                return;
+            }
+
+            _lastPoints = points;
+
+            int currentLevel = 0;
+            if (points < 45) currentLevel = 0;
+            else if (points < 90) currentLevel = 1;
+            else if (points < 135) currentLevel = 2;
+            else if (points < 180) currentLevel = 3;
+            else if (points < 225) currentLevel = 4;
+            else if (points < 270) currentLevel = 5;
+            else currentLevel = 6;
+
+            // レベルが変わった時だけ、そのレベルの介入を「追加」し、通知を行う
+            if (currentLevel != _lastLevel)
+            {
+                _lastLevel = currentLevel;
+                string message = GetLevelMessage(currentLevel);
+                if (!string.IsNullOrEmpty(message)) OnLog?.Invoke(message);
+
+                switch (currentLevel)
+                {
+                    case 1:
+                        OnNotification?.Invoke($"あなたの目標は「{goalSummary}」です。やるべきことに戻りましょう。", "警告");
+                        break;
+                    case 2:
+                        ApplyGrayscale();
+                        OnNotification?.Invoke("🎨 レベル2: グレースケール適用", "警告");
+                        break;
+                    case 3:
+                        EnableInputDelay();
+                        EnableMouseInversion();
+                        OnNotification?.Invoke("⚠️ レベル3: 操作妨害(入力遅延＋カーソル反転)", "警告");
+                        break;
+                    case 4:
+                        await PlayForcedAlertAsync();
+                        OnNotification?.Invoke("🔔 レベル4: ビープ音", "警告");
+                        break;
+                    case 5:
+                        OnLog?.Invoke("⚠️ ポイント上限！3秒後に画面をロックします。3秒間は解除できません...");
+                        await Task.Delay(3000);
+                        await EnforcePersistentLockAsync(3);
+                        break;
+                    case 6:
+                        OnLog?.Invoke("⚠️⚠️⚠️ 最終警告！5秒後にシャットダウンします！");
+                        await Task.Delay(5000);
+                        Process.Start("shutdown", "/s /f /t 0");
+                        break;
+                }
+            }
+        }
+
+        private string GetLevelMessage(int level)
+        {
+            return level switch
+            {
+                1 => "📢 レベル1: 警告通知",
+                2 => "🎨 レベル2: グレースケール適用",
+                3 => "⚠️ レベル3: 操作妨害(入力遅延＋カーソル反転)",
+                4 => "🔔 レベル4: ビープ音",
+                5 => "🔒 レベル5: 強制画面ロック",
+                6 => "💻 レベル6: 強制シャットダウン",
+                _ => ""
+            };
+        }
+
+        public void ResetAllInterventions()
+        {
+            DisableInputDelay();
+            DisableGrayscale();
+            DisableMouseInversion();
+        }
+
+        // --- 個別の介入機能 ---
+
+        private void EnableInputDelay()
+        {
+            if (_isDelayEnabled) return;
+            try
+            {
+                using (var curProcess = Process.GetCurrentProcess())
+                using (var curModule = curProcess.MainModule)
+                {
+                    if (curModule != null)
+                    {
+                        // モジュール名が取得できない場合があるため、nullチェックを強化
+                        string moduleName = curModule.ModuleName ?? "MonitAI.Agent.exe";
+                        
+                        _keyboardHookID = NativeMethods.SetWindowsHookEx(NativeMethods.WH_KEYBOARD_LL, _keyboardProc!,
+                            NativeMethods.GetModuleHandle(moduleName), 0);
+                            
+                        if (_keyboardHookID != IntPtr.Zero)
+                        {
+                            _isDelayEnabled = true;
+                            OnLog?.Invoke("入力遅延を有効化しました");
+                        }
+                        else
+                        {
+                            // エラーコードを取得してログ出力
+                            int errorCode = Marshal.GetLastWin32Error();
+                            OnLog?.Invoke($"フック設定失敗: Error {errorCode}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) { OnLog?.Invoke($"入力遅延エラー: {ex.Message}"); }
+        }
+
+        private void DisableInputDelay()
+        {
+            if (!_isDelayEnabled) return;
+            if (_keyboardHookID != IntPtr.Zero)
+            {
+                NativeMethods.UnhookWindowsHookEx(_keyboardHookID);
+                _keyboardHookID = IntPtr.Zero;
+                _isDelayEnabled = false;
+                OnLog?.Invoke("入力遅延を解除しました");
+            }
+        }
+
+        private async Task EnforcePersistentLockAsync(int durationSeconds)
+        {
+            OnLog?.Invoke($"🔒 頭を冷やしてください。{durationSeconds}秒間、ロックを強制します。");
+            
+            var endTime = DateTime.Now.AddSeconds(durationSeconds);
+            
+            // 指定時間が経過するまでループ
+            while (DateTime.Now < endTime)
+            {
+                // ロックを実行
+                NativeMethods.LockWorkStation();
+                
+                // 次のロックまで少し待機 (PCへの負荷軽減と、ユーザーに「あ、またロックされた」と認識させるため)
+                // 0.5秒間隔なら、パスワードを入力してデスクトップが表示された瞬間にまたロックされます
+                await Task.Delay(500);
+            }
+            
+            OnLog?.Invoke("🔓 強制ロック期間が終了しました。");
+        }
+
+        private void ApplyGrayscale()
+        {
+            if (_isGrayscaleEnabled) return;
+            try
+            {
+                if (!NativeMethods.MagInitialize()) return;
+                var matrix = new NativeMethods.MAGCOLOREFFECT
+                {
+                    transform = new float[] {
+                        0.3f,0.3f,0.3f,0,0,
+                        0.6f,0.6f,0.6f,0,0,
+                        0.1f,0.1f,0.1f,0,0,
+                        0,0,0,1,0,
+                        0,0,0,0,1
+                    }
+                };
+                if (NativeMethods.MagSetFullscreenColorEffect(ref matrix))
+                {
+                    _isGrayscaleEnabled = true;
+                    OnLog?.Invoke("グレースケールを適用しました");
+                }
+            }
+            catch (Exception ex) { OnLog?.Invoke($"グレースケールエラー: {ex.Message}"); }
+        }
+
+        private void DisableGrayscale()
+        {
+            if (!_isGrayscaleEnabled) return;
+            try
+            {
+                NativeMethods.MagUninitialize();
+                _isGrayscaleEnabled = false;
+                OnLog?.Invoke("グレースケールを解除しました");
+            }
+            catch { }
+        }
+
+        private void EnableMouseInversion()
+        {
+            if (_isMouseInverted) return;
+            _isMouseInverted = true;
+            NativeMethods.GetCursorPos(out var p);
+            _lastMousePos = new Point(p.X, p.Y);
+            _moveTimer?.Start();
+            _mouseInversionTimer?.Start();
+            OnLog?.Invoke("マウス反転を開始しました");
+        }
+
+        private void DisableMouseInversion()
+        {
+            if (!_isMouseInverted) return;
+            _moveTimer?.Stop();
+            _mouseInversionTimer?.Stop();
+            _isMouseInverted = false;
+            OnLog?.Invoke("マウス反転を解除しました");
+        }
+
+        // --- イベントハンドラ & コールバック ---
+
+        private void MoveTimer_Tick(object? sender, EventArgs e)
+        {
+            if (!_isMouseInverted) return;
+            NativeMethods.GetCursorPos(out var current);
+            int dx = current.X - _lastMousePos.X;
+            int dy = current.Y - _lastMousePos.Y;
+            int newX = current.X - (int)(dx * 1.5);
+            int newY = current.Y - (int)(dy * 1.5);
+            NativeMethods.SetCursorPos(newX, newY);
+            _lastMousePos = new Point(newX, newY);
+        }
+
+        private void MouseInversionTimer_Tick(object? sender, EventArgs e)
+        {
+            DisableMouseInversion();
+        }
+
+        private IntPtr KeyboardHookCallback(int nCode, IntPtr wParam, IntPtr lParam)
+        {
+            if (nCode >= 0 && wParam == (IntPtr)NativeMethods.WM_KEYDOWN && _isDelayEnabled && !_isSendingKey)
+            {
+                int vkCode = Marshal.ReadInt32(lParam);
+                Keys key = (Keys)vkCode;
+                bool isAlpha = (vkCode >= (int)Keys.A && vkCode <= (int)Keys.Z);
+                bool isNumber = (vkCode >= (int)Keys.D0 && vkCode <= (int)Keys.D9);
+
+                if (isAlpha || isNumber)
+                {
+                    ThreadPool.QueueUserWorkItem(_ =>
+                    {
+                        Thread.Sleep(1000);
+                        try
+                        {
+                            _isSendingKey = true;
+                            string sendStr = isAlpha ? key.ToString().ToLower() : key.ToString().Replace("D", "");
+                            SendKeys.SendWait(sendStr);
+                        }
+                        catch { }
+                        finally { _isSendingKey = false; }
+                    });
+                    return (IntPtr)1; // キー入力をキャンセル
+                }
+            }
+            return NativeMethods.CallNextHookEx(_keyboardHookID, nCode, wParam, lParam);
+        }
+
+        private async Task PlayForcedAlertAsync()
+        {
+            MMDevice? device = null;
+            float originalVolume = 0;
+            bool originalMute = false;
+            try
+            {
+                using (var enumerator = new MMDeviceEnumerator())
+                {
+                    device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+                }
+                if (device != null)
+                {
+                    originalVolume = device.AudioEndpointVolume.MasterVolumeLevelScalar;
+                    originalMute = device.AudioEndpointVolume.Mute;
+                    device.AudioEndpointVolume.Mute = false;
+                    device.AudioEndpointVolume.MasterVolumeLevelScalar = 0.8f;
+                }
+                await Task.Run(() => {
+                    for (int i = 0; i < 3; i++) { Console.Beep(2000, 200); Console.Beep(1000, 200); }
+                });
+            }
+            catch { }
+            finally
+            {
+                if (device != null)
+                {
+                    try { device.AudioEndpointVolume.Mute = originalMute; device.AudioEndpointVolume.MasterVolumeLevelScalar = originalVolume; } catch { }
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            ResetAllInterventions();
+            _moveTimer?.Dispose();
+            _mouseInversionTimer?.Dispose();
+        }
+    }
+}
