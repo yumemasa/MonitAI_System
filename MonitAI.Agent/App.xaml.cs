@@ -170,7 +170,6 @@ namespace MonitAI.Agent
             try
             {
                 // 初期化開始時は「準備中」とする
-                UpdateReadyStatus(false);
 
                 SetupCommandWatcher();
                 _screenshotService = new ScreenshotService();
@@ -213,7 +212,6 @@ namespace MonitAI.Agent
                 }
 
                 // 初期化完了（準備OK）
-                UpdateReadyStatus(true);
 
                 _interventionService = new InterventionService();
                 _interventionService.OnLog += msg => WriteLog($"[介入] {msg}");
@@ -225,19 +223,6 @@ namespace MonitAI.Agent
             }
         }
 
-        private void UpdateReadyStatus(bool isReady)
-        {
-            try
-            {
-                string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "screenShot2");
-                if (!Directory.Exists(appData)) Directory.CreateDirectory(appData);
-                string path = Path.Combine(appData, "agent_ready.json");
-                
-                var data = new { IsReady = isReady, Timestamp = DateTime.Now };
-                File.WriteAllText(path, JsonSerializer.Serialize(data));
-            }
-            catch { }
-        }
 
         private FileSystemWatcher? _commandWatcher;
 

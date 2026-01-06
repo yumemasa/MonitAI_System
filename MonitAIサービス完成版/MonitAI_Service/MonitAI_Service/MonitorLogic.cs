@@ -36,7 +36,12 @@ namespace MonitAI_Service
 
         public MonitorLogic()
         {
-            // Agent用のイベントソースを作成しておく（Agentは一般ユーザー権限で動くため作成できない）
+            // ★証明用ログ：コード変更が反映されているか確認
+            try { EventLog.WriteEntry("MonitAI_Service", "★証明用ログ：このメッセージが出たら新しいコードが動いています★", EventLogEntryType.Information); 
+            } catch 
+            {
+                
+            }
             try
             {
                 if (!EventLog.SourceExists("MonitAI.Agent"))

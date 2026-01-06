@@ -202,7 +202,6 @@ namespace MonitAI.UI.Features.Setup
             {
                 // ===== Source A: Agent連携ロジック（削除厳禁）=====
                 UpdateAgentConfig(goalText, ngText, session.StartTime, session.DurationMinutes);
-                UpdateServiceConfig(session.StartTime, session.DurationMinutes);
                 StartAgentProcess();
             }
             catch (Exception ex)
@@ -824,47 +823,6 @@ namespace MonitAI.UI.Features.Setup
             if (!settings.ContainsKey("Model")) settings["Model"] = "gemini-2.5-flash";
 
             File.WriteAllText(configPath, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }));
-        }
-
-        private void UpdateServiceConfig(DateTime startTime, double durationMinutes)
-        {
-            string? solutionRoot = GetSolutionRoot();
-            if (string.IsNullOrEmpty(solutionRoot))
-            {
-                Debug.WriteLine("Solution root not found.");
-                return;
-            }
-
-            string serviceConfigPath = Path.Combine(solutionRoot, @"MonitAIサービス完成版\settings.json");
-
-            DateTime endTime = startTime.AddMinutes(durationMinutes);
-            string? agentPath = GetAgentPath();
-
-            var config = new
-            {
-                Monitoring = new
-                {
-                    StartDate = startTime.ToString("yyyy-MM-dd"),
-                    EndDate = endTime.ToString("yyyy-MM-dd"),
-                    StartTime = startTime.ToString("HH:mm"),
-                    EndTime = endTime.ToString("HH:mm"),
-                    ProcessName = "MonitAI.Agent",
-                    ProcessPath = agentPath ?? ""
-                }
-            };
-
-            try
-            {
-                string? dir = Path.GetDirectoryName(serviceConfigPath);
-                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-
-                File.WriteAllText(serviceConfigPath, JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true }));
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error updating service config: {ex.Message}");
-            }
         }
 
         private void StartAgentProcess()

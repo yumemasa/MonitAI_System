@@ -649,7 +649,8 @@ namespace MonitAI.UI.Features.MonitoringOverlay
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    System.Windows.MessageBox.Show("集中セッション終了！お疲れ様でした。", "monitAI");
+                    // 最前面に表示するために DefaultDesktopOnly オプションを使用
+                    System.Windows.MessageBox.Show("集中セッション終了！お疲れ様でした。", "monitAI", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information, System.Windows.MessageBoxResult.OK, System.Windows.MessageBoxOptions.DefaultDesktopOnly);
                 });
 
                 StopMonitoringRequested?.Invoke();
