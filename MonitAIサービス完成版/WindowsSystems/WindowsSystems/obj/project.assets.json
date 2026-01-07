@@ -1658,23 +1658,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\it222187\\.nuget\\packages\\": {},
+    "C:\\Users\\it222104\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\it222187\\Downloads\\MonitAI_System\\MonitAI_System\\MonitAIサービス完成版\\WindowsSystems\\WindowsSystems\\WindowsSystems.csproj",
+      "projectUniqueName": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAIサービス完成版\\WindowsSystems\\WindowsSystems\\WindowsSystems.csproj",
       "projectName": "WindowsSystems",
-      "projectPath": "C:\\Users\\it222187\\Downloads\\MonitAI_System\\MonitAI_System\\MonitAIサービス完成版\\WindowsSystems\\WindowsSystems\\WindowsSystems.csproj",
-      "packagesPath": "C:\\Users\\it222187\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\it222187\\Downloads\\MonitAI_System\\MonitAI_System\\MonitAIサービス完成版\\WindowsSystems\\WindowsSystems\\obj\\",
+      "projectPath": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAIサービス完成版\\WindowsSystems\\WindowsSystems\\WindowsSystems.csproj",
+      "packagesPath": "C:\\Users\\it222104\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\it222104\\source\\repos\\MonitAI_System\\MonitAIサービス完成版\\WindowsSystems\\WindowsSystems\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\it222187\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\it222104\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -1732,7 +1732,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

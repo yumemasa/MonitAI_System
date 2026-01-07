@@ -45,7 +45,7 @@ namespace MonitAI_Service
         public MonitorLogic()
         {
             // ★証明用ログ：コード変更が反映されているか確認
-            try { EventLog.WriteEntry("MonitAI_Service", "★証明用ログ：このメッセージが出たら新しいコードが動いています★", EventLogEntryType.Information); 
+            try { EventLog.WriteEntry("MonitAI_Service", "★uuuuuuuuuuuuuuuuuuuu★", EventLogEntryType.Information); 
             } catch 
             {
                 
@@ -80,7 +80,7 @@ namespace MonitAI_Service
                     CheckAndRecoverApp();
                     try
                     {
-                        await Task.Delay(5000, _cts.Token);
+                        await Task.Delay(2000, _cts.Token);
                     }
                     catch (TaskCanceledException)
                     {

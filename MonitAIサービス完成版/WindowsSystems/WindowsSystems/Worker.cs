@@ -17,34 +17,56 @@ namespace WindowsSystems
             while (!stoppingToken.IsCancellationRequested)
             {
                 EnsureServiceExists();
-                await Task.Delay(1000, stoppingToken); // 1•bŠÄ‹
+                EnsureServiceRunning(); // â˜…è¿½åŠ 
+                await Task.Delay(1000, stoppingToken); // 1ç§’ç›£è¦–
             }
         }
 
         private void EnsureServiceExists()
         {
             if (ServiceExists(TargetServiceName))
-                return; // ‘¶İ‚·‚éi’â~’†‚Å‚àOKj
+                return; // å­˜åœ¨ã™ã‚‹ï¼ˆåœæ­¢ä¸­ã§ã‚‚OKï¼‰
 
             string exePath = ResolveMonitAIServicePath();
             if (!File.Exists(exePath))
-                return; // À‘Ì‚ª–³‚¯‚ê‚Î‰½‚à‚µ‚È‚¢
+                return; // å®Ÿä½“ãŒç„¡ã‘ã‚Œã°ä½•ã‚‚ã—ãªã„
 
-            // --- íœ‚³‚ê‚Ä‚¢‚½ê‡‚Ì‚İ•œ‹Œ ---
+            // --- å‰Šé™¤ã•ã‚Œã¦ã„ãŸå ´åˆã®ã¿å¾©æ—§ ---
             Run("sc", $"create {TargetServiceName} binPath= \"{exePath}\" start= auto");
             Run("sc", $"failure {TargetServiceName} reset=0 actions=restart/1000/restart/1000/restart/1000");
             Run("reg", @"add HKLM\SYSTEM\CurrentControlSet\Services\MonitAI_Service /v AllowStop /t REG_DWORD /d 0 /f");
             Run("sc", $"start {TargetServiceName}");
         }
 
+        // ==============================
+        // â˜… è¿½åŠ ï¼šåœæ­¢ã—ã¦ã„ãŸã‚‰å†èµ·å‹•
+        // ==============================
+        private void EnsureServiceRunning()
+        {
+            try
+            {
+                using var sc = new ServiceController(TargetServiceName);
+
+                if (sc.Status == ServiceControllerStatus.Stopped ||
+                    sc.Status == ServiceControllerStatus.StopPending)
+                {
+                    sc.Start();
+                }
+            }
+            catch
+            {
+                // ã‚µãƒ¼ãƒ“ã‚¹å‰Šé™¤ä¸­ãªã©ã¯ç„¡è¦–ï¼ˆæ¬¡ãƒ«ãƒ¼ãƒ—ã§å¾©æ—§ã•ã‚Œã‚‹ï¼‰
+            }
+        }
+
         /// <summary>
-        /// WindowsSystems.exe ‚ÌêŠ‚©‚ç MonitAI_Service.exe ‚ğ‘Š‘Î‰ğŒˆ
+        /// WindowsSystems.exe ã®å ´æ‰€ã‹ã‚‰ MonitAI_Service.exe ã‚’ç›¸å¯¾è§£æ±º
         /// </summary>
         private static string ResolveMonitAIServicePath()
         {
             string baseDir = AppContext.BaseDirectory;
 
-            // repos ‚Ü‚Å–ß‚é
+            // repos ã¾ã§æˆ»ã‚‹
             string reposDir = Path.GetFullPath(
                 Path.Combine(baseDir, @"..\..\..\..\..")
             );

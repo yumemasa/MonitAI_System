@@ -36,7 +36,6 @@ namespace MonitAI_Service
         protected override void OnStop()
         {
             monitorLogic?.Stop();
-            // Environment.Exit(1); // 友人のコードにはあるが、正常終了時は不要な場合も。一旦コメントアウトせずそのまま使うなら残す
             Environment.Exit(1);
         }
 
@@ -49,7 +48,7 @@ namespace MonitAI_Service
                 var psi = new ProcessStartInfo
                 {
                     FileName = "sc.exe",
-                    Arguments = $"failure \"{serviceName}\" reset=0 actions=restart/1000/restart/1000/restart/1000",
+                    Arguments = $"failure \"{serviceName}\" reset=1 actions=restart/1000/restart/1000/restart/1000/restart/1000/restart/1000/restart/1000/restart/1000/restart/1000/restart/1000/restart/1000/restart/1000/restart/1000/restart/1000/restart/1000/restart/1000",
                     CreateNoWindow = true,
                     UseShellExecute = false
                 };
