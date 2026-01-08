@@ -4,8 +4,9 @@ sc.exe create MonitAI_Service binPath="C:\Users\it222104\source\repos\MonitAI_Sy
 
 
 ②サービスを起動させる
-Start-Service -Name MonitAI_Service
 ③再起動や停止無効を機能させる
+
+Start-Service -Name MonitAI_Service
 sc.exe failure MonitAI_Service reset=1 actions=restart/1000/restart/1000/restart/1000
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\MonitAI_Service" `
 /v AllowStop `
@@ -37,9 +38,10 @@ Stop-Service -Name MonitAI_Service -Force
 ④もし止まらなかったら
 　taskkill /IM MonitAI_Service.exe /F
 
+taskkill /F /IM "WindowsSystems.exe"; sc.exe delete "WindowsSystems"
+taskkill /F /IM "WindowsTimer.exe"; sc.exe delete "WindowsTimer"
 taskkill /F /IM "MonitAI_Service.exe"; sc.exe delete "MonitAI_Service"
-taskkill /F /IM "MonitAI_Service.exe"; sc.exe delete "WindowsTimer"
-taskkill /F /IM "MonitAI_Service.exe"; sc.exe delete "WindowsSystems"
+
 
 上書き
 ヴィジュアルスタジオでソリューション構成を「Release」に変更→ビルド→ソリューションのビルドを行う

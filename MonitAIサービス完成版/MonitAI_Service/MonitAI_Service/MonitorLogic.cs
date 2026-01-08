@@ -5,6 +5,8 @@ using System.Text.Json;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Win32;
+using System.Security.Principal;
 
 namespace MonitAI_Service
 {
@@ -19,11 +21,38 @@ namespace MonitAI_Service
         // 動的に取得するため、readonlyフィールドではなくプロパティまたはメソッドで解決する
         private string GetConfigPath()
         {
-            string userName = GetActiveConsoleUserName();
-            if (string.IsNullOrEmpty(userName)) return string.Empty;
+            // アクティブユーザーとドメインを取得
+            if (!TryGetActiveSessionUser(out string userName, out string domainName))
+                return string.Empty;
 
-            // 簡易的に C:\Users\<User>\AppData\Roaming\... を構築
-            // ※本来はレジストリ(ProfileList)などを参照すべきだが、一般的な構成を想定
+            try
+            {
+                // SIDを取得してプロファイルパスを解決する
+                string accountName = string.IsNullOrEmpty(domainName) ? userName : $"{domainName}\\{userName}";
+                var account = new NTAccount(accountName);
+                var sid = account.Translate(typeof(SecurityIdentifier)).Value;
+
+                string profilePath = null;
+                using (var key = Registry.LocalMachine.OpenSubKey($@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\{sid}"))
+                {
+                    if (key != null)
+                    {
+                        profilePath = key.GetValue("ProfileImagePath") as string;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(profilePath))
+                {
+                    return Path.Combine(profilePath, @"AppData\Roaming\screenShot2\config.json");
+                }
+            }
+            catch (Exception ex)
+            {
+                // SID解決失敗時などはログを出してフォールバックへ
+                EventLog.WriteEntry("MonitAI_Service", $"Failed to resolve profile path via SID: {ex.Message}", EventLogEntryType.Warning);
+            }
+
+            // フォールバック: 簡易的に C:\Users\<User>\AppData\Roaming\... を構築
             return $@"C:\Users\{userName}\AppData\Roaming\screenShot2\config.json";
         }
         
