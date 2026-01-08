@@ -35,6 +35,13 @@ namespace MonitAI_Service
         private string _processName = "MonitAI.Agent";
         // デフォルトパス (設定ファイルにない場合のフォールバック)
         private string _processPath = string.Empty;
+        
+        // タスク作成確認のキャッシュ（毎回PowerShellを叩くと重いため）
+        private string _lastVerifiedTaskPath = string.Empty;
+
+        // ★Exe削除防止用のロック変数
+        private FileStream _lockedFileStream;
+        private string _lockedFilePath;
 
         // ==============================
         // 監視時間 (日付含む)
@@ -45,7 +52,7 @@ namespace MonitAI_Service
         public MonitorLogic()
         {
             // ★証明用ログ：コード変更が反映されているか確認
-            try { EventLog.WriteEntry("MonitAI_Service", "★uuuuuuuuuuuuuuuuuuuu★", EventLogEntryType.Information); 
+            try { EventLog.WriteEntry("MonitAI_Service", "★uuuuiiiiiiiiiiuuuu★", EventLogEntryType.Information); 
             } catch 
             {
                 
@@ -80,7 +87,7 @@ namespace MonitAI_Service
                     CheckAndRecoverApp();
                     try
                     {
-                        await Task.Delay(2000, _cts.Token);
+                        await Task.Delay(1000, _cts.Token);
                     }
                     catch (TaskCanceledException)
                     {
@@ -95,9 +102,51 @@ namespace MonitAI_Service
             _cts?.Cancel();
             try
             {
-                _monitorTask?.Wait(2000);
+                _monitorTask?.Wait(1500);
             }
             catch { }
+            UnlockAgent();
+        }
+
+        private void LockAgent(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return;
+            // 既に同じファイルをロック済みなら何もしない
+            if (_lockedFileStream != null && _lockedFilePath == path) return;
+
+            // 違うファイル、またはロックしていないなら、一旦解除して再取得
+            UnlockAgent();
+
+            try
+            {
+                if (File.Exists(path))
+                {
+                    // FileShare.Read により、他プロセスからの書き込み・削除を禁止する
+                    // Service自身は読むだけなので FileAccess.Read
+                    _lockedFileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    _lockedFilePath = path;
+                    EventLog.WriteEntry("MonitAI_Service", $"Agent Locked (Protected from deletion): {path}", EventLogEntryType.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                // ロック失敗（ファイル使用中などではないはずだが、権限等でエラーの場合）
+                EventLog.WriteEntry("MonitAI_Service", $"Failed to lock Agent: {ex.Message}", EventLogEntryType.Warning);
+            }
+        }
+
+        private void UnlockAgent()
+        {
+            if (_lockedFileStream != null)
+            {
+                try
+                {
+                    _lockedFileStream.Dispose();
+                }
+                catch { }
+                _lockedFileStream = null;
+                _lockedFilePath = null;
+            }
         }
 
         /// <summary>
@@ -112,11 +161,27 @@ namespace MonitAI_Service
             // ===== 監視時間外 =====
             if (!nowMonitoring)
             {
+                UnlockAgent(); // 監視時間外はロック解除
                 KillAgentRepeatedly();
                 return;
             }
 
             // ===== 監視時間内 =====
+
+            // パス解決（未設定の場合）
+            if (string.IsNullOrEmpty(_processPath))
+            {
+                string serviceDir = AppDomain.CurrentDomain.BaseDirectory;
+                string sameDirCandidate = Path.Combine(serviceDir, "MonitAI.Agent.exe");
+                if (File.Exists(sameDirCandidate))
+                {
+                    _processPath = sameDirCandidate;
+                }
+            }
+
+            // エージェントExeをロックして削除を防止
+            LockAgent(_processPath);
+
             try
             {
                 var processes = Process.GetProcessesByName(_processName);
@@ -125,20 +190,8 @@ namespace MonitAI_Service
                     // プロセスパスが空なら何もしない（またはログ出力）
                     if (string.IsNullOrEmpty(_processPath))
                     {
-                        // フォールバック: Configにパスがない場合、Serviceと同じ場所などを探す
-                        // (ソースコードのハードコーディングは削除)
-                        string serviceDir = AppDomain.CurrentDomain.BaseDirectory;
-                        string sameDirCandidate = Path.Combine(serviceDir, "MonitAI.Agent.exe");
-                        
-                        if (File.Exists(sameDirCandidate))
-                        {
-                            _processPath = sameDirCandidate;
-                        }
-                        else
-                        {
-                            EventLog.WriteEntry("MonitAI_Service", $"AgentPath is not set in config and not found in service directory.", EventLogEntryType.Warning);
-                            return;
-                        }
+                        EventLog.WriteEntry("MonitAI_Service", $"AgentPath is not set in config and not found in service directory.", EventLogEntryType.Warning);
+                        return;
                     }
 
                     // ★修正: タスクスケジューラを使用してユーザーセッションで起動する
@@ -168,83 +221,127 @@ namespace MonitAI_Service
                     FileName = "schtasks.exe",
                     Arguments = $"/run /tn \"{AgentTaskName}\"",
                     CreateNoWindow = true,
-                    UseShellExecute = false
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
                 };
 
-                Process.Start(psi);
-                
-                EventLog.WriteEntry(
-                    "MonitAI_Service",
-                    $"{_processName} was not running. Triggered scheduled task '{AgentTaskName}' to restart.",
-                    EventLogEntryType.Information
-                );
+                using (var proc = Process.Start(psi))
+                {
+                    string output = proc.StandardOutput.ReadToEnd();
+                    string error = proc.StandardError.ReadToEnd();
+                    proc.WaitForExit();
+
+                    if (proc.ExitCode == 0)
+                    {
+                        EventLog.WriteEntry(
+                            "MonitAI_Service",
+                            $"{_processName} was not running. Triggered scheduled task '{AgentTaskName}' to restart.\nPath: {_processPath}\nOutput: {output}",
+                            EventLogEntryType.Information
+                        );
+                    }
+                    else
+                    {
+                        EventLog.WriteEntry(
+                            "MonitAI_Service",
+                            $"Failed to run scheduled task '{AgentTaskName}'. ExitCode: {proc.ExitCode}\nOutput: {output}\nError: {error}",
+                            EventLogEntryType.Error
+                        );
+                        // 失敗した場合、次回は必ずタスク定義を確認するようにキャッシュをクリア
+                        _lastVerifiedTaskPath = string.Empty;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 EventLog.WriteEntry("MonitAI_Service", $"Failed to run scheduled task: {ex.Message}", EventLogEntryType.Error);
+                // 例外時も念のためキャッシュクリア
+                _lastVerifiedTaskPath = string.Empty;
             }
         }
 
         private void EnsureAgentTaskExists()
         {
-            try
+            // キャッシュチェック: パスが変わっていなければ何もしない（高速化）
+            if (!string.IsNullOrEmpty(_processPath) && _processPath == _lastVerifiedTaskPath)
             {
-                // タスクが存在するか確認
-                var check = Process.Start(new ProcessStartInfo
-                {
-                    FileName = "schtasks.exe",
-                    Arguments = $"/query /tn \"{AgentTaskName}\"",
-                    CreateNoWindow = true,
-                    UseShellExecute = false
-                });
-
-                check.WaitForExit();
-                if (check.ExitCode == 0)
-                    return; // 既に存在する
+                return;
             }
-            catch { }
 
             try
             {
-                // タスクを作成
-                // サービス(SYSTEM)からユーザーのタスクを作成する
-                
-                string currentUser = GetActiveConsoleUserName(); // 動的に取得
-                if (string.IsNullOrEmpty(currentUser))
-                {
-                    EventLog.WriteEntry("MonitAI_Service", "Cannot determine active user for task creation.", EventLogEntryType.Error);
-                    return;
-                }
+                string currentUser = GetActiveUserForTask(); // ドメイン対応版
+                if (string.IsNullOrEmpty(currentUser)) return; // ユーザー特定できなければスキップ
+
+                string workDir = Path.GetDirectoryName(_processPath);
+                if (string.IsNullOrEmpty(workDir)) workDir = "C:\\";
+
+                // PowerShellスクリプト: 作業ディレクトリ付きでタスクを作成する
+                // 既にタスクが存在していても、パスが異なれば更新するロジックを追加
+                string psScript = $@"
+$tn = '{AgentTaskName}';
+$user = '{currentUser}';
+$path = '{_processPath}';
+$dir = '{workDir}';
+
+$needRegister = $true;
+# 既にタスクがあるか確認
+$exists = Get-ScheduledTask -TaskName $tn -ErrorAction SilentlyContinue;
+if ($exists) {{
+    # アクションのパスを確認
+    $act = $exists.Actions[0];
+    if ($act.Execute -eq $path -and $act.WorkingDirectory -eq $dir) {{
+         $needRegister = $false;
+    }}
+}}
+
+if ($needRegister) {{
+    # アクション: 実行ファイルと作業フォルダを設定
+    $action = New-ScheduledTaskAction -Execute $path -WorkingDirectory $dir;
+
+    # プリンシパル: 該当ユーザーの対話セッションで実行 (GUIアプリはInteractive必須)
+    $principal = New-ScheduledTaskPrincipal -UserId $user -LogonType Interactive -RunLevel Limited;
+
+    # 設定: 実行時間制限なし(0)、電源条件無視
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Seconds 0);
+
+    # 登録 (強制上書き -Force)
+    Register-ScheduledTask -TaskName $tn -Action $action -Principal $principal -Settings $settings -Force;
+}}
+";
+
+                // Base64エンコードして実行
+                string encodedCommand = Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(psScript));
 
                 var psi = new ProcessStartInfo
                 {
-                    FileName = "schtasks.exe",
-                    Arguments =
-                        $"/create /tn \"{AgentTaskName}\" " +
-                        $"/tr \"\\\"{_processPath}\\\"\" " +
-                        "/sc onlogon " +
-                        $"/ru \"{currentUser}\" " +
-                        "/rl limited " +
-                        "/f",
+                    FileName = "powershell.exe",
+                    Arguments = $"-NoProfile -ExecutionPolicy Bypass -EncodedCommand {encodedCommand}",
                     CreateNoWindow = true,
-                    UseShellExecute = false
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
                 };
 
-                var proc = Process.Start(psi);
+                using var proc = Process.Start(psi);
+                string err = proc.StandardError.ReadToEnd();
                 proc.WaitForExit();
-                
-                if (proc.ExitCode == 0)
+
+                if (proc.ExitCode != 0)
                 {
-                    EventLog.WriteEntry("MonitAI_Service", $"Created scheduled task '{AgentTaskName}' for user '{currentUser}'.", EventLogEntryType.Information);
+                    EventLog.WriteEntry("MonitAI_Service", $"PowerShell task creation failed. ExitCode: {proc.ExitCode}\nError: {err}", EventLogEntryType.Warning);
+                    _lastVerifiedTaskPath = string.Empty; // 失敗時はキャッシュしない
                 }
                 else
                 {
-                    EventLog.WriteEntry("MonitAI_Service", $"Failed to create scheduled task. ExitCode: {proc.ExitCode}", EventLogEntryType.Warning);
+                    // 成功時、このパスでタスク確認済みとする
+                    _lastVerifiedTaskPath = _processPath;
                 }
             }
             catch (Exception ex)
             {
-                EventLog.WriteEntry("MonitAI_Service", $"Exception creating task: {ex.Message}", EventLogEntryType.Error);
+                EventLog.WriteEntry("MonitAI_Service", $"Exception creating task via PowerShell: {ex.Message}", EventLogEntryType.Error);
+                _lastVerifiedTaskPath = string.Empty;
             }
         }
 
@@ -444,29 +541,60 @@ namespace MonitAI_Service
 
         private string GetActiveConsoleUserName()
         {
+            if (TryGetActiveSessionUser(out string user, out _))
+                return user;
+            return null;
+        }
+
+        private string GetActiveUserForTask()
+        {
+            if (TryGetActiveSessionUser(out string user, out string domain))
+            {
+                if (!string.IsNullOrEmpty(domain)) return $"{domain}\\{user}";
+                return user;
+            }
+            return null;
+        }
+
+        private bool TryGetActiveSessionUser(out string user, out string domain)
+        {
+            user = null;
+            domain = null;
             try
             {
-                // アクティブなセッションIDを取得
                 int sessionId = WTSGetActiveConsoleSessionId();
-                if (sessionId == -1) return null; // セッションなし
+                if (sessionId == -1) return false; // セッションなし
 
-                IntPtr buffer;
-                int strLen;
-                
-                // ユーザー名取得
-                if (WTSQuerySessionInformation(IntPtr.Zero, sessionId, WTS_INFO_CLASS.WTSUserName, out buffer, out strLen) && strLen > 1)
+                if (QueryWTS(sessionId, WTS_INFO_CLASS.WTSUserName, out user))
                 {
-                    string userName = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(buffer);
-                    WTSFreeMemory(buffer);
-                    return userName;
+                    QueryWTS(sessionId, WTS_INFO_CLASS.WTSDomainName, out domain);
+                    return true;
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                // エラーログはくどくなるので最低限に
-                // EventLog.WriteEntry("MonitAI_Service", $"User detection failed: {ex.Message}", EventLogEntryType.Warning);
             }
-            return null; // 特定失敗
+            return false;
+        }
+
+        private bool QueryWTS(int sessionId, WTS_INFO_CLASS infoClass, out string result)
+        {
+            result = null;
+            IntPtr buffer = IntPtr.Zero;
+            int bytesReturned;
+            try
+            {
+                if (WTSQuerySessionInformation(IntPtr.Zero, sessionId, infoClass, out buffer, out bytesReturned) && bytesReturned > 1)
+                {
+                    result = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(buffer);
+                    return true;
+                }
+            }
+            finally
+            {
+                if (buffer != IntPtr.Zero) WTSFreeMemory(buffer);
+            }
+            return false;
         }
     }
 }

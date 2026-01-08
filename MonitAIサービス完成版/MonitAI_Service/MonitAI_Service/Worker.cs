@@ -19,7 +19,7 @@ namespace MonitAI_Service
 
                 EventLog.WriteEntry(
                     "MonitAI_Service",
-                    "Service Started (Friend's Logic)",
+                    "Service Started",
                     EventLogEntryType.Information
                 );
 

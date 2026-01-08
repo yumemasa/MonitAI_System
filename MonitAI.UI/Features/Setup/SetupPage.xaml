@@ -199,7 +199,7 @@
                                     </Border>
                                 </Grid>
 
-                                <Slider Grid.Row="1" x:Name="TimeSlider" Minimum="5" Maximum="180"
+                                <Slider Grid.Row="1" x:Name="TimeSlider" Minimum="1" Maximum="180"
                                         Value="45" TickFrequency="5" IsSnapToTickEnabled="True"
                                         Margin="0,8,0,16" ValueChanged="TimeSlider_ValueChanged"/>
 
