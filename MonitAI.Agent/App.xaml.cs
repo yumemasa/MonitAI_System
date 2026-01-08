@@ -114,8 +114,8 @@ namespace MonitAI.Agent
 
                 if (isConfigValid)
                 {
-                    StartMonitoring();
-                    WriteTempLog("Monitoring Started");
+                    // StartMonitoring(); // ここでの呼び出しは削除し、InitializeServices 完了後に移動
+                    // WriteTempLog("Monitoring Started");
                 }
                 else
                 {
@@ -216,6 +216,11 @@ namespace MonitAI.Agent
                 _interventionService = new InterventionService();
                 _interventionService.OnLog += msg => WriteLog($"[介入] {msg}");
                 _interventionService.OnNotification += (msg, title) => ShowNotification(title, msg);
+
+                // 初期化完了後に監視を開始する（CLIモードなら起動待ち完了後、APIモードなら即時）
+                // ★修正: 初回は待機なしで即時実行する
+                StartMonitoring(runImmediately: true);
+                WriteTempLog("Monitoring Started (Post-Init)");
             }
             catch (Exception ex)
             {
@@ -311,36 +316,55 @@ namespace MonitAI.Agent
             _notifyIcon.ContextMenuStrip = contextMenu;
         }
 
-        private void StartMonitoring()
+        private void StartMonitoring(bool runImmediately = false)
         {
             if (_isCapturing) return;
 
             _screenshotCount = 0;
             _isCapturing = true;
-            WriteLog("🚀 監視・撮影サイクルを開始しました (ランダム)");
+            WriteLog("🚀 監視・撮影サイクルを開始しました");
 
-            _ = StartCaptureLoop();
+            _ = StartCaptureLoop(runImmediately);
         }
 
-        private async Task StartCaptureLoop()
+        private async Task StartCaptureLoop(bool runImmediately)
         {
             const int cycleMs = 20000;
+            bool isFirstRun = true;
 
             while (_isCapturing)
             {
                 try
                 {
-                    int delay = _random.Next(1000, cycleMs - 1000);
-                    WriteLog($"待機: {delay / 1000.0:F1}秒...");
+                    int delay;
+                    
+                    if (isFirstRun && runImmediately)
+                    {
+                        // 初回かつ即時実行フラグがある場合は、待機時間を短くする
+                        delay = 200; // 少しだけ待つ
+                        WriteLog($"初回即時実行: {delay / 1000.0:F1}秒...");
+                    }
+                    else
+                    {
+                        delay = _random.Next(1000, cycleMs - 1000);
+                        WriteLog($"待機: {delay / 1000.0:F1}秒...");
+                    }
 
                     await Task.Delay(delay);
 
                     if (!_isCapturing) break;
 
                     await PerformCaptureAndAnalysis();
+                    
+                    isFirstRun = false;
 
                     int remaining = cycleMs - delay;
-                    if (remaining > 0) await Task.Delay(remaining);
+                    if (remaining > 0)
+                    {
+                        // 初回即時実行だった場合は、残りのサイクル時間を消化する（連射防止）
+                        // ただし初回は少し早めに次の判定に行ってもいいかもしれないので、通常のサイクル維持
+                        await Task.Delay(remaining);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -369,7 +393,7 @@ namespace MonitAI.Agent
 
             HandleAnalysisResult(result);
 
-            _screenshotService.DeleteFiles(files);
+            await _screenshotService.DeleteFilesAsync(files);
         }
 
         private void HandleAnalysisResult(GeminiAnalysisResult result)

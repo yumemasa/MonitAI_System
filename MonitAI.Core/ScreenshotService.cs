@@ -89,5 +89,34 @@ namespace MonitAI.Core
                 }
             }
         }
+
+        public async Task DeleteFilesAsync(IEnumerable<string> filePaths)
+        {
+            foreach (var path in filePaths)
+            {
+                if (File.Exists(path))
+                {
+                    // 最大3回リトライ (500ms待機)
+                    for (int i = 0; i < 3; i++)
+                    {
+                        try
+                        {
+                            File.Delete(path);
+                            break;
+                        }
+                        catch (IOException) // ロックされている場合など
+                        {
+                            if (i == 2) break; // 最後なら、諦める（またはログ出力など）
+                            await Task.Delay(500);
+                        }
+                        catch
+                        {
+                            // その他のエラーは即時終了
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -51,17 +51,7 @@ namespace MonitAI.Core
         /// </summary>
         public async Task ApplyLevelAsync(int points, string goalSummary)
         {
-            // ポイントが減少した（＝正常判定だった）場合、すべてのペナルティを解除
-            if (points < _lastPoints)
-            {
-                ResetAllInterventions();
-                OnLog?.Invoke("✅ 正常判定のため、ペナルティを解除しました。");
-                _lastPoints = points;
-                _lastLevel = 0; 
-                return;
-            }
-
-            _lastPoints = points;
+           
 
             int currentLevel = 0;
             if (points < 45) currentLevel = 0;
@@ -71,6 +61,17 @@ namespace MonitAI.Core
             else if (points < 225) currentLevel = 4;
             else if (points < 270) currentLevel = 5;
             else currentLevel = 6;
+
+            // ポイントが減少した（＝正常判定だった）場合、すべてのペナルティを解除
+            if (points < _lastPoints)
+            {
+                ResetAllInterventions();
+                OnLog?.Invoke("✅ 正常判定のため、ペナルティを解除しました。");
+                _lastPoints = points;
+                _lastLevel = currentLevel; // 0ではなく現在のレベルに合わせておくことで、次に上がった時に判定できる
+                return;
+            }
+             _lastPoints = points;
 
             // レベルが変わった時だけ、そのレベルの介入を「追加」し、通知を行う
             if (currentLevel != _lastLevel)
