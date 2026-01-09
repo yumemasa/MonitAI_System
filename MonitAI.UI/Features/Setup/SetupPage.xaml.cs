@@ -823,9 +823,13 @@ namespace MonitAI.UI.Features.Setup
                 settings["AgentPath"] = agentPath;
             }
 
-            // 常に正しいパスで上書き（現状仕様）
+            // CLI Path: 設定がない場合のみデフォルト値をセットする
             string appDataRoaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            settings["CliPath"] = Path.Combine(appDataRoaming, @"npm\gemini.cmd");
+            if (!settings.ContainsKey("CliPath") || string.IsNullOrWhiteSpace(settings["CliPath"]))
+            {
+                settings["CliPath"] = Path.Combine(appDataRoaming, @"npm\gemini.cmd");
+            }
+            // else: 既存の設定値(明示的な指定または既存のデフォルト)を維持
 
             if (!settings.ContainsKey("Model")) settings["Model"] = "gemini-2.5-flash";
 

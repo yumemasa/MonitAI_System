@@ -24,7 +24,7 @@
                         <TextBlock Text="AIの動作モードを選択してください。" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,12"/>
                         
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                            <RadioButton x:Name="RadioCli" Content="Gemini CLI (推奨)" GroupName="AiMode" IsChecked="True" Margin="0,0,20,0"/>
+                            <RadioButton x:Name="RadioCli" Content="Gemini CLI" GroupName="AiMode" IsChecked="True" Margin="0,0,20,0"/>
                             <RadioButton x:Name="RadioApi" Content="Gemini API" GroupName="AiMode"/>
                         </StackPanel>
 
@@ -47,6 +47,22 @@
                             <ComboBoxItem Content="gemini-flash-latest"/>
                             <ComboBoxItem Content="gemini-flash-lite-latest"/>
                         </ComboBox>
+                    </StackPanel>
+                </ui:CardControl>
+
+                <!-- 高度な設定 -->
+                <ui:CardControl Icon="{ui:SymbolIcon Wrench24}" Header="高度な設定 " Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="必要がなければ空欄のままで問題ありません。環境に合わせてパスを明示的に指定する場合に使用します。" 
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,12" TextWrapping="Wrap"/>
+                        
+                        <!-- CLI Path -->
+                        <TextBlock Text="Gemini CLI パス (例: C:\Users\...\npm\gemini.cmd)" Margin="0,0,0,4"/>
+                        <ui:TextBox x:Name="CliPathInput" PlaceholderText="デフォルト: gemini（PATH依存） または 自動検出" Margin="0,0,0,12"/>
+
+                        <!-- ACP Script Path -->
+                        <TextBlock Text="ACP Script パス (例: C:\Users\...\dist\index.js)" Margin="0,0,0,4"/>
+                        <ui:TextBox x:Name="AcpScriptPathInput" PlaceholderText="デフォルト: AppData\npm\node_modules\..." Margin="0,0,0,0"/>
                     </StackPanel>
                 </ui:CardControl>
 

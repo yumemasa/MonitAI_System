@@ -36,10 +36,15 @@ namespace MonitAI.Agent
 
         private Forms.NotifyIcon? _notifyIcon;
 
+        // ファイル保護用ストリーム
+        private FileStream? _configLockStream;
+        private FileStream? _statusLockStream;
+
         // 設定値
         private string _apiKey = "";
         private string _rules = "";
         private string _cliPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"npm\gemini.cmd");
+        private string _acpScriptPath = ""; // ACPモード用スクリプトパス (空ならデフォルト)
         private string _selectedModel = "gemini-2.5-flash-lite"; // デフォルト
         private DateTime? _endTime = null; // 終了時刻
         private bool _useApi = false; // APIモードかどうか
@@ -195,7 +200,9 @@ namespace MonitAI.Agent
                 {
                     // 常駐プロセス起動 (ACP)
                     WriteLog("🚀 Gemini常駐プロセスを起動しています...");
-                    bool started = await _geminiService.StartAsync(_saveFolderPath);
+                    if (!string.IsNullOrEmpty(_acpScriptPath)) WriteLog($"ACPスクリプトパス指定: {_acpScriptPath}");
+
+                    bool started = await _geminiService.StartAsync(_saveFolderPath, scriptPath: _acpScriptPath);
                     if (started)
                     {
                         WriteLog("✅ 常駐プロセス起動成功。待機中。");
@@ -329,7 +336,7 @@ namespace MonitAI.Agent
 
         private async Task StartCaptureLoop(bool runImmediately)
         {
-            const int cycleMs = 20000;
+            const int cycleMs = 16000;
             bool isFirstRun = true;
 
             while (_isCapturing)
@@ -433,14 +440,33 @@ namespace MonitAI.Agent
         {
             try
             {
-                string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "screenShot2");
-                if (!Directory.Exists(appData)) Directory.CreateDirectory(appData);
-                string statusPath = Path.Combine(appData, "status.json");
+                // 初期化されていない場合のみパス解決・ストリームオープンを行う
+                if (_statusLockStream == null)
+                {
+                    string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "screenShot2");
+                    if (!Directory.Exists(appData)) Directory.CreateDirectory(appData);
+                    string statusPath = Path.Combine(appData, "status.json");
+
+                    // ReadWriteで開き、Read共有のみ許可（外部からの書き込み・削除を禁止）
+                    _statusLockStream = new FileStream(statusPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                }
 
                 var status = new { Points = points, LastUpdated = DateTime.Now };
-                File.WriteAllText(statusPath, JsonSerializer.Serialize(status));
+                string json = JsonSerializer.Serialize(status);
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
+
+                if (_statusLockStream != null)
+                {
+                    _statusLockStream.Seek(0, SeekOrigin.Begin);
+                    _statusLockStream.Write(bytes, 0, bytes.Length);
+                    _statusLockStream.SetLength(bytes.Length); // 短くなった場合のために切り詰める
+                    _statusLockStream.Flush();
+                }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                WriteLog($"ステータス更新エラー: {ex.Message}");
+            }
         }
 
         private void ShowNotification(string title, string message)
@@ -464,7 +490,10 @@ namespace MonitAI.Agent
                     {
                         if (settings.TryGetValue("ApiKey", out var key)) _apiKey = key;
                         if (settings.TryGetValue("Rules", out var rules)) _rules = rules;
-                        if (settings.TryGetValue("CliPath", out var path)) _cliPath = path;
+                        if (settings.TryGetValue("CliPath", out var path) && !string.IsNullOrWhiteSpace(path)) _cliPath = path;
+
+                        // ACP Script Path
+                        if (settings.TryGetValue("AcpScriptPath", out var acpPath)) _acpScriptPath = acpPath;
 
                         // ★追加: UIで保存したモデル設定を読み込む
                         if (settings.TryGetValue("Model", out var model)) _selectedModel = model;
@@ -484,6 +513,14 @@ namespace MonitAI.Agent
 
                         WriteLog("設定読み込み完了");
                     }
+
+                    // 読み込み後はファイルをロックして、外部からの変更・削除を防止する
+                    if (_configLockStream == null)
+                    {
+                        // Readのみ許可（Write不可）で開き続ける
+                        _configLockStream = new FileStream(configPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                        WriteLog($"設定ファイルをロックしました: {configPath}");
+                    }
                 }
             }
             catch (Exception ex)
@@ -499,6 +536,11 @@ namespace MonitAI.Agent
             _notifyIcon?.Dispose();
             _interventionService?.Dispose();
             _geminiService?.Dispose();
+
+            // ロック解放
+            _configLockStream?.Close();
+            _statusLockStream?.Close();
+
             base.OnExit(e);
         }
     }

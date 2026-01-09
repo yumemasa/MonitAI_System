@@ -70,6 +70,18 @@ namespace MonitAI.UI.Features.Settings
                             }
                         }
                     }
+
+                    // CLI Path
+                    if (settings.TryGetValue("CliPath", out var cliPath))
+                    {
+                        CliPathInput.Text = cliPath;
+                    }
+
+                    // ACP Script Path
+                    if (settings.TryGetValue("AcpScriptPath", out var acpPath))
+                    {
+                        AcpScriptPathInput.Text = acpPath;
+                    }
                 }
             }
             catch (Exception ex)
@@ -99,6 +111,10 @@ namespace MonitAI.UI.Features.Settings
                 {
                     settings["Model"] = selectedItem.Content.ToString() ?? "gemini-2.5-flash-lite";
                 }
+
+                // Advanced Settings (空の場合はキーを削除、または空文字列として保存)
+                settings["CliPath"] = CliPathInput.Text.Trim();
+                settings["AcpScriptPath"] = AcpScriptPathInput.Text.Trim();
 
                 // 保存
                 string dir = Path.GetDirectoryName(ConfigPath)!;

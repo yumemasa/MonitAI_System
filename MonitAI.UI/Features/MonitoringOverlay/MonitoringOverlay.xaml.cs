@@ -212,22 +212,33 @@ namespace MonitAI.UI.Features.MonitoringOverlay
 
                 if (File.Exists(statusPath))
                 {
-                    string json = File.ReadAllText(statusPath);
-                    using var doc = JsonDocument.Parse(json);
-                    if (doc.RootElement.TryGetProperty("Points", out var pointsProp))
+                    // FileShare.ReadWriteを指定して、Agentが書き込みロックしていても読み込めるようにする
+                    using (var fs = new FileStream(statusPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    using (var sr = new StreamReader(fs))
                     {
-                        int totalPoints = pointsProp.GetInt32();
+                        if (fs.Length > 0)
+                        {
+                            string json = sr.ReadToEnd();
+                            if (!string.IsNullOrWhiteSpace(json))
+                            {
+                                using var doc = JsonDocument.Parse(json);
+                                if (doc.RootElement.TryGetProperty("Points", out var pointsProp))
+                                {
+                                    int totalPoints = pointsProp.GetInt32();
 
-                        // ポイントからレベルを計算
-                        if (totalPoints < 45)
-                        {
-                            _currentPenaltyLevel = 1;
-                            _currentPoints = totalPoints;
-                        }
-                        else
-                        {
-                            _currentPenaltyLevel = (totalPoints / PointsPerLevel) + 1;
-                            _currentPoints = totalPoints % PointsPerLevel;
+                                    // ポイントからレベルを計算
+                                    if (totalPoints < 45)
+                                    {
+                                        _currentPenaltyLevel = 1;
+                                        _currentPoints = totalPoints;
+                                    }
+                                    else
+                                    {
+                                        _currentPenaltyLevel = (totalPoints / PointsPerLevel) + 1;
+                                        _currentPoints = totalPoints % PointsPerLevel;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -502,12 +513,23 @@ namespace MonitAI.UI.Features.MonitoringOverlay
 
                 if (File.Exists(statusPath))
                 {
-                    string json = File.ReadAllText(statusPath);
-                    using var doc = JsonDocument.Parse(json);
-                    if (doc.RootElement.TryGetProperty("Points", out var pointsProp))
+                    // Agentが書き込みロックしている可能性があるため、FileShare.ReadWriteを指定して開く
+                    using (var fs = new FileStream(statusPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    using (var sr = new StreamReader(fs))
                     {
-                        int totalPoints = pointsProp.GetInt32();
-                        UpdatePointsFromAgent(totalPoints);
+                        if (fs.Length > 0)
+                        {
+                            string json = sr.ReadToEnd();
+                            if (!string.IsNullOrWhiteSpace(json))
+                            {
+                                using var doc = JsonDocument.Parse(json);
+                                if (doc.RootElement.TryGetProperty("Points", out var pointsProp))
+                                {
+                                    int totalPoints = pointsProp.GetInt32();
+                                    UpdatePointsFromAgent(totalPoints);
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -515,17 +537,18 @@ namespace MonitAI.UI.Features.MonitoringOverlay
                 string logPath = Path.Combine(appData, "agent_log.txt");
                 if (File.Exists(logPath))
                 {
+                    // ログファイルも同様にロック回避のため FileShare.ReadWrite で開く
                     using (var fs = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     using (var sr = new StreamReader(fs))
                     {
-                        // 読み込みサイズを拡大 (4KB -> 64KB)
+                        // 読み込みサイズを拡大 (例外回避のため最後尾のみ読むなどの工夫も可だが、ここでは全文読む)
+                        // ファイルサイズが大きい場合は適宜調整
                         if (fs.Length > 65536)
                         {
                             fs.Seek(-65536, SeekOrigin.End);
                         }
                         string content = sr.ReadToEnd();
 
-                        // 全文表示 (スクロール可能になったため行数制限を撤廃)
                         _latestLogContent = content;
                         if (DebugLogText != null)
                         {
